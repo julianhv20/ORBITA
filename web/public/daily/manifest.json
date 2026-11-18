@@ -1,0 +1,208 @@
+{
+  "season": 1,
+  "epochDate": "2026-11-17",
+  "lexiconFile": "lexicon_es.txt",
+  "lexiconCount": 18052,
+  "puzzles": [
+    {
+      "id": "001",
+      "slug": "reloj",
+      "coreWord": "RELOJ",
+      "subtitle": "El pulso invisible que domestica la eternidad.",
+      "accent": "#E5A93C",
+      "jsonFile": "daily_001_reloj.json",
+      "binFile": "daily_001_reloj.bin",
+      "candidateCount": 165,
+      "sMax": 92.7,
+      "percentiles": {
+        "p25": 71.4,
+        "p50": 80.5,
+        "p75": 88.3,
+        "p90": 90.6,
+        "p99": 91.9
+      },
+      "binBytes": 22456,
+      "jsonBytes": 27622
+    },
+    {
+      "id": "002",
+      "slug": "fuego",
+      "coreWord": "FUEGO",
+      "subtitle": "La chispa prometeica entre la destrucción y el hogar.",
+      "accent": "#F97316",
+      "jsonFile": "daily_002_fuego.json",
+      "binFile": "daily_002_fuego.bin",
+      "candidateCount": 99,
+      "sMax": 92.9,
+      "percentiles": {
+        "p25": 76.0,
+        "p50": 81.8,
+        "p75": 88.1,
+        "p90": 90.9,
+        "p99": 92.3
+      },
+      "binBytes": 13480,
+      "jsonBytes": 17068
+    },
+    {
+      "id": "003",
+      "slug": "espejo",
+      "coreWord": "ESPEJO",
+      "subtitle": "La frontera líquida donde el observador se duplica.",
+      "accent": "#38BDF8",
+      "jsonFile": "daily_003_espejo.json",
+      "binFile": "daily_003_espejo.bin",
+      "candidateCount": 88,
+      "sMax": 91.6,
+      "percentiles": {
+        "p25": 79.9,
+        "p50": 83.6,
+        "p75": 89.3,
+        "p90": 90.7,
+        "p99": 91.4
+      },
+      "binBytes": 11984,
+      "jsonBytes": 16694
+    },
+    {
+      "id": "004",
+      "slug": "puente",
+      "coreWord": "PUENTE",
+      "subtitle": "Geometría suspendida que reconcilia dos abismos.",
+      "accent": "#34D399",
+      "jsonFile": "daily_004_puente.json",
+      "binFile": "daily_004_puente.bin",
+      "candidateCount": 98,
+      "sMax": 92.6,
+      "percentiles": {
+        "p25": 78.0,
+        "p50": 83.5,
+        "p75": 89.8,
+        "p90": 91.1,
+        "p99": 92.0
+      },
+      "binBytes": 13344,
+      "jsonBytes": 17648
+    },
+    {
+      "id": "005",
+      "slug": "sombra",
+      "coreWord": "SOMBRA",
+      "subtitle": "La huella silenciosa que la luz deja tras la materia.",
+      "accent": "#A78BFA",
+      "jsonFile": "daily_005_sombra.json",
+      "binFile": "daily_005_sombra.bin",
+      "candidateCount": 88,
+      "sMax": 92.2,
+      "percentiles": {
+        "p25": 82.0,
+        "p50": 87.0,
+        "p75": 89.5,
+        "p90": 90.5,
+        "p99": 91.7
+      },
+      "binBytes": 11984,
+      "jsonBytes": 16975
+    },
+    {
+      "id": "006",
+      "slug": "raiz",
+      "coreWord": "RAÍZ",
+      "subtitle": "Ancla subterránea, origen léxico y memoria matemática.",
+      "accent": "#10B981",
+      "jsonFile": "daily_006_raiz.json",
+      "binFile": "daily_006_raiz.bin",
+      "candidateCount": 68,
+      "sMax": 93.2,
+      "percentiles": {
+        "p25": 81.8,
+        "p50": 85.8,
+        "p75": 91.0,
+        "p90": 92.2,
+        "p99": 93.2
+      },
+      "binBytes": 9264,
+      "jsonBytes": 13124
+    },
+    {
+      "id": "007",
+      "slug": "laberinto",
+      "coreWord": "LABERINTO",
+      "subtitle": "Arquitectura del extravío, el oído interno y el enigma.",
+      "accent": "#F43F5E",
+      "jsonFile": "daily_007_laberinto.json",
+      "binFile": "daily_007_laberinto.bin",
+      "candidateCount": 70,
+      "sMax": 93.1,
+      "percentiles": {
+        "p25": 81.2,
+        "p50": 85.1,
+        "p75": 90.0,
+        "p90": 91.8,
+        "p99": 93.1
+      },
+      "binBytes": 9536,
+      "jsonBytes": 13799
+    },
+    {
+      "id": "008",
+      "slug": "oceano",
+      "coreWord": "OCÉANO",
+      "subtitle": "Cuna abisal de la vida, las mareas y lo inconmensurable.",
+      "accent": "#22D3EE",
+      "jsonFile": "daily_008_oceano.json",
+      "binFile": "daily_008_oceano.bin",
+      "candidateCount": 72,
+      "sMax": 92.9,
+      "percentiles": {
+        "p25": 82.3,
+        "p50": 87.1,
+        "p75": 90.1,
+        "p90": 91.5,
+        "p99": 92.9
+      },
+      "binBytes": 9808,
+      "jsonBytes": 14496
+    },
+    {
+      "id": "009",
+      "slug": "memoria",
+      "coreWord": "MEMORIA",
+      "subtitle": "Archivo vivo de neuronas, silicio y cicatrices del tiempo.",
+      "accent": "#F472B6",
+      "jsonFile": "daily_009_memoria.json",
+      "binFile": "daily_009_memoria.bin",
+      "candidateCount": 69,
+      "sMax": 92.6,
+      "percentiles": {
+        "p25": 79.1,
+        "p50": 84.8,
+        "p75": 89.9,
+        "p90": 91.6,
+        "p99": 92.2
+      },
+      "binBytes": 9400,
+      "jsonBytes": 13735
+    },
+    {
+      "id": "010",
+      "slug": "eco",
+      "coreWord": "ECO",
+      "subtitle": "El retorno acústico de una voz que se niega a extinguirse.",
+      "accent": "#2DD4BF",
+      "jsonFile": "daily_010_eco.json",
+      "binFile": "daily_010_eco.bin",
+      "candidateCount": 65,
+      "sMax": 93.0,
+      "percentiles": {
+        "p25": 81.5,
+        "p50": 85.9,
+        "p75": 90.5,
+        "p90": 92.0,
+        "p99": 92.6
+      },
+      "binBytes": 8856,
+      "jsonBytes": 13440
+    }
+  ]
+}

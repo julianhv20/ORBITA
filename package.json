@@ -1,0 +1,15 @@
+{
+  "name": "orbita-monorepo",
+  "private": true,
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "etl": "python pipeline/build_season.py",
+    "test:etl": "python -m unittest discover -s pipeline/tests -v",
+    "test:parity": "node pipeline/tests/verify_js_parity.mjs",
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "typecheck": "npm run typecheck -w web"
+  }
+}

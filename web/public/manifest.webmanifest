@@ -1,0 +1,10 @@
+{
+  "name": "ÓRBITA — Juego Diario de Pensamiento Divergente",
+  "short_name": "ÓRBITA",
+  "description": "Observatorio diario de pensamiento divergente y distancia semántica.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#040508",
+  "theme_color": "#040508",
+  "lang": "es"
+}

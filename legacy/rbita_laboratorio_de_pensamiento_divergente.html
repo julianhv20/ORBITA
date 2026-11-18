@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ÓRBITA — Laboratorio de Pensamiento Divergente</title>
+  
+  <!-- Tipografías: Inter (UI limpia) y JetBrains Mono (Telemetría científica) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            void: '#070B14',
+            panel: '#0D1424',
+            borderSubtle: '#1E293B',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos base del observatorio científico */
+    body {
+      background-color: #070B14;
+      color: #F1F5F9;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 30% 45%, rgba(14, 116, 144, 0.10) 0%, transparent 55%),
+        radial-gradient(circle at 80% 15%, rgba(99, 102, 241, 0.07) 0%, transparent 45%);
+    }
+
+    .glass-panel {
+      background: rgba(13, 20, 36, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid #1E293B;
+    }
+
+    /* Scrollbar sutil para bitácora de satélites */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Animación sutil para pulso de evaluación */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35); }
+      50% { box-shadow: 0 0 18px 2px rgba(34, 211, 238, 0.25); }
+    }
+    .eval-pulse {
+      animation: pulseGlow 1.5s infinite ease-in-out;
+    }
+
+    /* Transición suave de entrada para tarjetas */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-entry {
+      animation: fadeSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- ===================================================================== -->
+  <!-- BARRA SUPERIOR: IDENTIDAD, SELECTOR DE NÚCLEO Y CONTROLES GLOBALES    -->
+  <!-- ===================================================================== -->
+  <header class="glass-panel sticky top-0 z-30 border-b border-[#1E293B] px-4 py-3 lg:px-6">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Identidad del Laboratorio -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 to-amber-500/20 border border-cyan-500/40 flex items-center justify-center shadow-inner">
+          <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3" fill="currentColor" class="text-amber-400"/>
+            <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-25 12 12)"/>
+            <circle cx="19.5" cy="8.5" r="1.5" fill="currentColor" class="text-cyan-300"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold tracking-wider text-base sm:text-lg text-white">ÓRBITA</h1>
+            <span class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
+              DAT Lab v1.0
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Laboratorio de Pensamiento Divergente · Distancia Semántica</p>
+        </div>
+      </div>
+
+      <!-- Selector de Palabra Núcleo (w0) -->
+      <div class="flex items-center gap-1.5 bg-[#070B14]/90 p-1 rounded-xl border border-[#1E293B] order-3 lg:order-2 w-full lg:w-auto justify-between sm:justify-center">
+        <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 px-2 hidden sm:inline">Núcleo w₀:</span>
+        <div id="coreSelector" class="flex items-center gap-1 flex-1 sm:flex-initial justify-around">
+          <button data-core="RELOJ" class="core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-sm">
+            RELOJ
+          </button>
+          <button data-core="FUEGO" class="core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent">
+            FUEGO
+          </button>
+          <button data-core="ESPEJO" class="core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent">
+            ESPEJO
+          </button>
+          <button data-core="PUENTE" class="core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent">
+            PUENTE
+          </button>
+        </div>
+      </div>
+
+      <!-- Botones de Acción (Sonido, Reiniciar, Ayuda) -->
+      <div class="flex items-center gap-2 order-2 lg:order-3">
+        <button id="soundToggleBtn" title="Alternar audio generativo" class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-[#1E293B] text-cyan-400 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium">
+          <svg id="soundIconOn" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="soundIconOff" class="w-4 h-4 hidden text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+          <span class="hidden md:inline font-mono text-[11px]" id="soundLabel">Audio ON</span>
+        </button>
+
+        <button id="resetBtn" class="px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-[#1E293B] text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          <span class="hidden sm:inline">Reiniciar Órbita</span>
+        </button>
+
+        <button id="helpBtn" class="px-3 py-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>¿Cómo funciona?</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- CONTENEDOR PRINCIPAL: 70% RADAR GRAVITACIONAL / 30% TELEMETRÍA        -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 lg:p-5 flex flex-col lg:flex-row gap-4">
+    
+    <!-- COLUMNA IZQUIERDA (70%): RADAR GRAVITACIONAL EN CANVAS -->
+    <section class="w-full lg:w-[68%] xl:w-[70%] glass-panel rounded-2xl relative flex flex-col overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[calc(100vh-108px)] shadow-2xl">
+      
+      <!-- HUD Superior del Radar: Leyenda de Zonas y Estado del Motor -->
+      <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
+        <div class="bg-[#070B14]/85 backdrop-blur-md border border-[#1E293B] rounded-xl px-3 py-2 text-[11px] flex flex-wrap items-center gap-x-4 gap-y-1">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span class="text-slate-300">Límite de Roche <span class="text-slate-500">(Obvio)</span></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span class="text-slate-300">Zona Orbital <span class="text-slate-500">(Creativo)</span></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+            <span class="text-slate-300">Vacío Exterior <span class="text-slate-500">(Inconexo)</span></span>
+          </div>
+        </div>
+
+        <div id="engineStatusBadge" class="bg-[#070B14]/85 backdrop-blur-md border border-[#1E293B] rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-400 flex items-center gap-2">
+          <span id="engineDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="engineText">Motor Semántico Listo</span>
+        </div>
+      </div>
+
+      <!-- Canvas Interactivo -->
+      <div id="canvasWrapper" class="relative flex-1 w-full h-full cursor-crosshair">
+        <canvas id="radarCanvas" class="block w-full h-full"></canvas>
+
+        <!-- Tooltip Flotante al pasar cursor / tocar nodos o líneas -->
+        <div id="canvasTooltip" class="hidden pointer-events-none absolute z-20 max-w-xs bg-[#070B14]/95 backdrop-blur-md border border-cyan-500/40 rounded-xl p-3 shadow-xl text-xs transition-opacity duration-150">
+          <div id="tooltipHeader" class="font-mono font-bold text-cyan-300 mb-1"></div>
+          <div id="tooltipBody" class="text-slate-300 leading-relaxed"></div>
+          <div id="tooltipMeta" class="mt-1.5 pt-1.5 border-t border-slate-800 font-mono text-[10px] text-slate-400"></div>
+        </div>
+
+        <!-- Toast Flotante de Feedback Inmediato (Rechazos / Aciertos) -->
+        <div id="radarToast" class="hidden pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 z-20 max-w-md w-[90%] sm:w-auto px-4 py-2.5 rounded-xl border backdrop-blur-md shadow-2xl text-xs sm:text-sm font-medium text-center transition-all duration-300">
+        </div>
+      </div>
+
+      <!-- Consola Inferior de Lanzamiento -->
+      <div class="p-3 sm:p-4 bg-[#070B14]/90 border-t border-[#1E293B] z-10">
+        <form id="launchForm" class="max-w-2xl mx-auto flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <input
+                id="wordInput"
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                maxlength="28"
+                placeholder="Lanza un concepto conectado a RELOJ (ej. arena, dalí, biología...)"
+                class="w-full bg-[#0D1424] border border-[#1E293B] focus:border-cyan-500/70 focus:ring-2 focus:ring-cyan-500/20 rounded-xl px-4 py-3 text-sm sm:text-base text-white placeholder-slate-500 outline-none transition-all font-medium"
+              />
+              <span id="inputCounter" class="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[11px] text-slate-500">
+                0/5
+              </span>
+            </div>
+            <button
+              id="launchBtn"
+              type="submit"
+              class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-slate-950 font-semibold text-sm sm:text-base transition-all cursor-pointer shadow-lg shadow-cyan-500/15 flex items-center gap-2 shrink-0"
+            >
+              <span id="launchBtnText">Lanzar</span>
+              <svg id="launchBtnIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <svg id="launchSpinner" class="w-4 h-4 animate-spin hidden" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Pista contextual dinámica -->
+          <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <span id="promptHint">Objetivo: Conecta con el núcleo usando conceptos lo más distantes posible entre sí.</span>
+            <span class="font-mono text-slate-500 hidden sm:inline">ENTER ↵</span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- COLUMNA DERECHA (30%): PANEL DE TELEMETRÍA COGNITIVA -->
+    <aside class="w-full lg:w-[32%] xl:w-[30%] flex flex-col gap-4">
+      
+      <!-- Tarjeta de Resultado Final (Visible al completar 5/5 satélites) -->
+      <div id="finalResultCard" class="hidden glass-panel rounded-2xl p-4 sm:p-5 border-cyan-500/50 bg-gradient-to-b from-cyan-950/30 to-[#0D1424] shadow-2xl animate-entry">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-mono uppercase tracking-widest text-cyan-400 font-semibold">Constelación Completa</span>
+          <span id="finalPercentile" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            Top 10%
+          </span>
+        </div>
+
+        <div class="flex items-baseline gap-2 my-1">
+          <span id="finalScoreValue" class="text-4xl font-mono font-bold text-white">0.0</span>
+          <span class="text-sm font-mono text-slate-400">/ 100 pts</span>
+        </div>
+
+        <div id="finalRankBadge" class="inline-block text-sm font-semibold text-amber-300 mb-3">
+          Arquitecto Divergente
+        </div>
+
+        <!-- Resumen Visual Compartible estilo Wordle -->
+        <div id="sharePreviewBox" class="bg-[#070B14] border border-[#1E293B] rounded-xl p-3 font-mono text-xs text-slate-300 whitespace-pre-line leading-relaxed mb-3 select-all"></div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="copyResultBtn" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="copyBtnText">Copiar Resultado</span>
+          </button>
+          <button id="nextCoreBtn" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs transition-all cursor-pointer border border-slate-700">
+            Probar Otro Núcleo →
+          </button>
+        </div>
+      </div>
+
+      <!-- Métricas Principales en Tiempo Real -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-mono uppercase tracking-wider text-slate-400">Telemetría Cognitiva</h2>
+          <span class="text-[11px] font-mono text-slate-500">Fórmula DAT Harvard</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <!-- Satélites en órbita -->
+          <div class="bg-[#070B14]/80 border border-[#1E293B] rounded-xl p-3">
+            <div class="text-[11px] text-slate-400 mb-1">Satélites en Órbita</div>
+            <div class="flex items-baseline justify-between">
+              <span id="orbitCountText" class="text-2xl font-mono font-bold text-white">0<span class="text-slate-500 text-base">/5</span></span>
+              <div id="slotDots" class="flex gap-1">
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Índice Divergente -->
+          <div class="bg-[#070B14]/80 border border-[#1E293B] rounded-xl p-3">
+            <div class="text-[11px] text-slate-400 mb-1">Índice Divergente</div>
+            <div class="flex items-baseline gap-1.5">
+              <span id="datScoreText" class="text-2xl font-mono font-bold text-cyan-400">--</span>
+              <span id="datPairsText" class="text-[10px] font-mono text-slate-500">0 pares</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Referencia Psicométrica -->
+        <div class="mb-4">
+          <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+            <span>Lineal (50)</span>
+            <span>Promedio (78)</span>
+            <span class="text-cyan-400">Arquitecto (85+)</span>
+          </div>
+          <div class="h-2 w-full bg-[#070B14] rounded-full overflow-hidden border border-[#1E293B] relative">
+            <!-- Marcador promedio humano (78%) -->
+            <div class="absolute top-0 bottom-0 left-[78%] w-0.5 bg-slate-500/70 z-10" title="Promedio humano: 78"></div>
+            <div id="scoreProgressBar" class="h-full bg-gradient-to-r from-amber-500 via-cyan-400 to-emerald-400 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Monitor de Tensión Semántica -->
+        <div id="tensionBox" class="bg-[#070B14]/80 border border-[#1E293B] rounded-xl p-3 text-xs">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-mono text-[11px] text-slate-400">Tensión entre Nodos</span>
+            <span id="tensionBadge" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">En espera</span>
+          </div>
+          <p id="tensionDescription" class="text-slate-400 text-[11px] leading-relaxed">
+            Lanza al menos 2 satélites para medir la distancia coseno entre tus conceptos.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bitácora de Satélites e Insights -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex-1 flex flex-col min-h-[240px]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-mono uppercase tracking-wider text-slate-400">Bitácora Orbital</h2>
+          <span id="rejectedCountBadge" class="text-[11px] font-mono text-slate-500">0 rechazos</span>
+        </div>
+
+        <div id="satelliteList" class="flex-1 flex flex-col gap-2.5 overflow-y-auto max-h-[340px] pr-1">
+          <!-- Estado vacío inicial -->
+          <div id="emptyListPlaceholder" class="flex-1 flex flex-col items-center justify-center text-center py-8 px-4 border border-dashed border-[#1E293B] rounded-xl">
+            <div class="text-slate-500 mb-2">
+              <svg class="w-7 h-7 mx-auto opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-1">Órbita despejada</p>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Escribe una palabra que tenga vínculo con el núcleo, pero evita asociaciones obvias del mismo grupo.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ¿CÓMO FUNCIONA? (CIENCIA DEL DAT Y REGLAS DE 10 SEGUNDOS)      -->
+  <!-- ===================================================================== -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full rounded-2xl p-5 sm:p-6 border border-slate-700 shadow-2xl animate-entry max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🪐</span>
+          <h3 class="font-bold text-base sm:text-lg text-white">La Ciencia detrás de ÓRBITA</h3>
+        </div>
+        <button id="closeHelpBtn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p>
+          Basado en el <strong class="text-cyan-300">Divergent Association Task (DAT)</strong> de la Universidad de Harvard (Olson et al., 2021) y la teoría de la <strong class="text-amber-300">Bisociación</strong> de Arthur Koestler: las mentes más creativas logran conectar un concepto central con dominios radicalmente distantes entre sí.
+        </p>
+
+        <div class="bg-[#070B14] border border-[#1E293B] rounded-xl p-3.5 space-y-2.5">
+          <div class="font-mono text-[11px] uppercase tracking-wider text-slate-400">Reglas en 10 Segundos</div>
+          <ul class="space-y-2 text-xs">
+            <li class="flex items-start gap-2">
+              <span class="text-cyan-400 font-bold">1.</span>
+              <span>Lanza <strong>5 palabras</strong> que tengan una relación real (funcional, metafórica, científica o cultural) con la <strong>Palabra Núcleo</strong>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-rose-400 font-bold">2.</span>
+              <span><strong>Evita el Límite de Roche:</strong> si pones sinónimos directos o derivados (ej. <em>relojes</em>, <em>hora</em> para RELOJ), caerán al centro y serán rechazados.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400 font-bold">3.</span>
+              <span><strong>Maximiza la repulsión:</strong> tus 5 palabras deben pertenecer a mundos distintos. Si pones <em>minuto</em> y <em>segundo</em>, aparecerá una línea roja de fricción que bajará tu puntaje.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-cyan-950/30 border border-cyan-800/40 rounded-xl p-3 text-xs">
+          <span class="font-mono text-cyan-300 font-semibold block mb-1">Ejemplo para Núcleo: RELOJ</span>
+          <span class="text-slate-400">❌ Lineal (62 pts):</span> <span class="text-slate-300">tiempo, hora, aguja, pulsera, alarma</span><br/>
+          <span class="text-emerald-400">✅ Divergente (88 pts):</span> <span class="text-white font-medium">arena, surrealismo, biología, cuco, cuarzo</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button id="startPlayingModalBtn" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs sm:text-sm cursor-pointer transition-colors">
+          Entendido, volver al Radar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MOTOR DEL JUEGO: AUDIO, SEMÁNTICA (GEMINI + LOCAL), FÍSICA Y CANVAS   -->
+  <!-- ===================================================================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      // =========================================================================
+      // 1. CONFIGURACIÓN Y CONSTANTES DEL OBSERVATORIO
+      // =========================================================================
+      const CORE_CONFIGS = {
+        RELOJ: {
+          word: 'RELOJ',
+          placeholder: 'Lanza un concepto conectado a RELOJ (ej. arena, dalí, biología...)',
+          hint: 'Pista: piensa en mecanismos, arte, naturaleza, historia o metáforas del tiempo.',
+          accent: '#F59E0B',
+          // Vector semántico de 16 dimensiones:
+          // [0:Tiempo/Ritmo, 1:Mecánica/Tech, 2:Naturaleza/Bio, 3:Arte/Cultura, 4:Física/Energía,
+          //  5:Óptica/Luz, 6:Arquitectura/Espacio, 7:Psicología/Mente, 8:Agua/Fluido, 9:Calor/Fuego,
+          //  10:Viaje/Navegación, 11:Cuerpo/Anatomía, 12:Música/Acústica, 13:Mineral/Material, 14:Social/Ritual, 15:Mitología/Símbolo]
+          vec: [0.75, 0.55, 0.05, 0.15, 0.25, 0.05, 0.10, 0.20, 0.05, 0.00, 0.20, 0.10, 0.20, 0.15, 0.15, 0.25]
+        },
+        FUEGO: {
+          word: 'FUEGO',
+          placeholder: 'Lanza un concepto conectado a FUEGO (ej. prometeo, cocina, volcán...)',
+          hint: 'Pista: explora mitología, química, gastronomía, emociones o ecosistemas.',
+          accent: '#F97316',
+          vec: [0.05, 0.15, 0.25, 0.15, 0.65, 0.45, 0.10, 0.30, 0.00, 0.85, 0.05, 0.10, 0.05, 0.20, 0.25, 0.45]
+        },
+        ESPEJO: {
+          word: 'ESPEJO',
+          placeholder: 'Lanza un concepto conectado a ESPEJO (ej. narciso, telescopio, simetría...)',
+          hint: 'Pista: considera óptica, psicología, literatura, astronomía o arquitectura.',
+          accent: '#38BDF8',
+          vec: [0.05, 0.20, 0.10, 0.35, 0.15, 0.85, 0.30, 0.60, 0.25, 0.00, 0.05, 0.15, 0.05, 0.35, 0.10, 0.40]
+        },
+        PUENTE: {
+          word: 'PUENTE',
+          placeholder: 'Lanza un concepto conectado a PUENTE (ej. odontología, música, diplomacia...)',
+          hint: 'Pista: un puente une extremos en ingeniería, anatomía, música o relaciones.',
+          accent: '#34D399',
+          vec: [0.10, 0.35, 0.10, 0.15, 0.20, 0.05, 0.80, 0.15, 0.30, 0.00, 0.65, 0.20, 0.25, 0.30, 0.45, 0.25]
+        }
+      };
+
+      const SATELLITE_PALETTE = [
+        { hex: '#22D3EE', glow: 'rgba(34, 211, 238, 0.35)', emoji: '🔵', name: 'Cian' },
+        { hex: '#A78BFA', glow: 'rgba(167, 139, 250, 0.35)', emoji: '🟣', name: 'Violeta' },
+        { hex: '#34D399', glow: 'rgba(52, 211, 153, 0.35)', emoji: '🟢', name: 'Esmeralda' },
+        { hex: '#FB923C', glow: 'rgba(251, 146, 60, 0.35)', emoji: '🟠', name: 'Ámbar' },
+        { hex: '#F472B6', glow: 'rgba(244, 114, 182, 0.35)', emoji: '🟡', name: 'Solar' }
+      ];
+
+      // =========================================================================
+      // 2. MOTOR DE AUDIO GENERATIVO (WEB AUDIO API)
+      // =========================================================================
+      class SoundEngine {
+        constructor() {
+          this.ctx = null;
+          this.enabled = true;
+        }
+
+        ensureContext() {
+          if (!this.enabled) return null;
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        }
+
+        toggle() {
+          this.enabled = !this.enabled;
+          if (this.enabled) this.ensureContext();
+          return this.enabled;
+        }
+
+        // Sonido sutil de disparo de sonda
+        playLaunch() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.12);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        }
+
+        // Nota armónica lidia proporcional a la distancia divergente lograda
+        playOrbitSuccess(divergenceRatio = 0.8, nodeIndex = 0) {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+
+          // Escala Lidia en Do (C4, D4, E4, F#4, G4, A4, B4, D5, E5)
+          const lydianFreqs = [261.63, 293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 587.33, 659.25];
+          const clamped = Math.max(0, Math.min(1, divergenceRatio));
+          const scaleIdx = Math.min(lydianFreqs.length - 1, Math.floor(clamped * 6) + (nodeIndex % 3));
+          const freq = lydianFreqs[scaleIdx];
+
+          // Oscilador principal cristalino
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(freq, now);
+
+          osc2.type = 'triangle';
+          osc2.frequency.setValueAtTime(freq * 2, now); // Octava superior suave
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.11, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.85);
+
+          const subGain = ctx.createGain();
+          subGain.gain.value = 0.25;
+
+          osc1.connect(gain);
+          osc2.connect(subGain);
+          subGain.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.9);
+          osc2.stop(now + 0.9);
+        }
+
+        // Sonido grave de desacoplamiento (Límite de Roche o Vacío Exterior)
+        playReject() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+
+          const osc = ctx.createOscillator();
+          const filter = ctx.createBiquadFilter();
+          const gain = ctx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(165, now);
+          osc.frequency.exponentialRampToValueAtTime(68, now + 0.35);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(320, now);
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.4);
+        }
+
+        // Acorde de resonancia al completar los 5 satélites
+        playConstellationComplete(hasRedTension = false) {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const chord = hasRedTension
+            ? [261.63, 329.63, 392.00] // Tríada mayor cálida
+            : [261.63, 329.63, 392.00, 493.88, 587.33, 739.99]; // Acorde Lidio Maj9(#11)
+
+          chord.forEach((freq, idx) => {
+            const start = now + idx * 0.075;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.linearRampToValueAtTime(0.075, start + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.0005, start + 1.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 1.45);
+          });
+        }
+      }
+
+      const sound = new SoundEngine();
+
+      // =========================================================================
+      // 3. MOTOR SEMÁNTICO LOCAL DETERMINISTA (RESPALDO DE ALTA PRECISIÓN)
+      // =========================================================================
+      // Base de conocimiento curada por dominios con vectores de 16 dimensiones
+      // para garantizar respuesta instantánea si falla la red o hay latencia.
+      const LOCAL_LEXICON = {
+        RELOJ: {
+          obvious: ['relojes', 'relojeria', 'relojero', 'hora', 'horas', 'tiempo', 'minuto', 'minutos', 'segundo', 'segundos', 'cronometro', 'despertador', 'manecilla', 'manecillas', 'aguja', 'agujas', 'tic', 'tac', 'tictac', 'puntualidad'],
+          entries: {
+            arena: { domain: 'Geología / Clepsidra', vec: [0.4, 0.1, 0.3, 0.1, 0.1, 0.0, 0.1, 0.1, 0.5, 0.1, 0.1, 0.0, 0.0, 0.9, 0.1, 0.3], insight: 'Clepsidras antiguas medían el flujo temporal mediante granos de sílice.' },
+            dali: { domain: 'Arte Surrealista', vec: [0.3, 0.0, 0.0, 0.95, 0.0, 0.1, 0.1, 0.6, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.5], insight: 'Los relojes blandos en "La persistencia de la memoria" de Dalí.' },
+            surrealismo: { domain: 'Corriente Artística', vec: [0.2, 0.0, 0.0, 0.95, 0.0, 0.1, 0.1, 0.7, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.5], insight: 'Deformación onírica del tiempo mecánico en la pintura del siglo XX.' },
+            biologia: { domain: 'Cronobiología', vec: [0.3, 0.0, 0.95, 0.0, 0.1, 0.2, 0.0, 0.2, 0.1, 0.0, 0.0, 0.7, 0.0, 0.0, 0.0, 0.0], insight: 'El ritmo circadiano regula el sueño y metabolismo sin engranajes.' },
+            circadiano: { domain: 'Neurociencia', vec: [0.3, 0.0, 0.9, 0.0, 0.1, 0.3, 0.0, 0.5, 0.0, 0.0, 0.0, 0.7, 0.0, 0.0, 0.0, 0.0], insight: 'Oscilador biológico interno sincronizado con la luz solar.' },
+            cuarzo: { domain: 'Mineralogía / Física', vec: [0.2, 0.5, 0.1, 0.0, 0.6, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.95, 0.0, 0.0], insight: 'Oscilación piezoeléctrica constante de cristales de dióxido de silicio.' },
+            cuco: { domain: 'Ornitología / Artesanía', vec: [0.2, 0.3, 0.85, 0.3, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.1, 0.6, 0.1, 0.2, 0.2], insight: 'Autómata acústico inspirado en el canto territorial del cuco europeo.' },
+            sol: { domain: 'Astronomía', vec: [0.3, 0.0, 0.4, 0.1, 0.7, 0.8, 0.2, 0.0, 0.0, 0.7, 0.2, 0.0, 0.0, 0.0, 0.2, 0.5], insight: 'Los gnomones proyectan la sombra solar como primer indicador horario.' },
+            sombra: { domain: 'Óptica', vec: [0.2, 0.0, 0.2, 0.3, 0.1, 0.9, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4], insight: 'Desplazamiento angular de la penumbra en cuadrantes solares.' },
+            muneca: { domain: 'Anatomía / Moda', vec: [0.1, 0.2, 0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.9, 0.0, 0.1, 0.3, 0.0], insight: 'Articulación carpiana que convirtió el instrumento en accesorio portátil.' },
+            pulsera: { domain: 'Indumentaria', vec: [0.2, 0.3, 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, 0.2, 0.4, 0.0], insight: 'Correa diseñada originalmente para pilotos de aviación.' },
+            pendulo: { domain: 'Física Clásica', vec: [0.4, 0.6, 0.0, 0.0, 0.85, 0.0, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2, 0.0, 0.1], insight: 'Isocronismo descubierto por Galileo al observar lámparas oscilantes.' },
+            engranaje: { domain: 'Ingeniería Mecánica', vec: [0.3, 0.95, 0.0, 0.0, 0.4, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.1, 0.4, 0.0, 0.0], insight: 'Tren de ruedas dentadas que divide el torque en frecuencias exactas.' },
+            atomo: { domain: 'Física Cuántica', vec: [0.3, 0.4, 0.0, 0.0, 0.95, 0.3, 0.0, 0.0, 0.0, 0.1, 0.1, 0.0, 0.1, 0.3, 0.0, 0.0], insight: 'Transición hiperfina del cesio-133 que define el segundo internacional.' },
+            cesio: { domain: 'Química / Metrología', vec: [0.3, 0.4, 0.0, 0.0, 0.9, 0.2, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.7, 0.0, 0.0], insight: 'Elemento alcalino cuya frecuencia atómica gobierna el GPS global.' },
+            navegacion: { domain: 'Geografía / Marítima', vec: [0.2, 0.4, 0.1, 0.0, 0.1, 0.1, 0.2, 0.0, 0.5, 0.0, 0.95, 0.0, 0.0, 0.1, 0.2, 0.1], insight: 'El cronómetro marino permitió calcular la longitud en alta mar.' },
+            ajedrez: { domain: 'Juegos / Estrategia', vec: [0.4, 0.2, 0.0, 0.2, 0.0, 0.0, 0.1, 0.7, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.6, 0.1], insight: 'Doble cronómetro alternado que convierte el pensamiento en recurso finito.' },
+            corazon: { domain: 'Fisiología', vec: [0.4, 0.1, 0.7, 0.1, 0.2, 0.0, 0.0, 0.3, 0.3, 0.1, 0.0, 0.95, 0.4, 0.0, 0.0, 0.3], insight: 'Marcapasos biológico que marca pulsaciones rítmicas continuas.' },
+            musica: { domain: 'Acústica / Arte', vec: [0.5, 0.1, 0.1, 0.7, 0.2, 0.0, 0.0, 0.4, 0.1, 0.0, 0.0, 0.1, 0.95, 0.0, 0.3, 0.2], insight: 'El compás y el metrónomo estructuran el sonido en intervalos regulares.' },
+            metronomo: { domain: 'Teoría Musical', vec: [0.6, 0.5, 0.0, 0.4, 0.3, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.0, 0.0], insight: 'Péndulo invertido patentado para fijar el tempo de interpretación.' },
+            agua: { domain: 'Hidrología', vec: [0.2, 0.1, 0.5, 0.1, 0.2, 0.2, 0.1, 0.1, 0.95, 0.0, 0.2, 0.1, 0.2, 0.0, 0.1, 0.2], insight: 'Las clepsidras egipcias medían la noche mediante goteo constante.' },
+            campana: { domain: 'Arquitectura / Acústica', vec: [0.3, 0.3, 0.0, 0.2, 0.2, 0.0, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.85, 0.5, 0.7, 0.3], insight: 'Torres cívicas anunciaban las horas mediante resonancia de bronce.' },
+            londres: { domain: 'Geografía Urbana', vec: [0.2, 0.2, 0.0, 0.3, 0.0, 0.0, 0.85, 0.0, 0.2, 0.0, 0.4, 0.0, 0.2, 0.1, 0.6, 0.3], insight: 'Meridiano de Greenwich y el Big Ben como estándar horario mundial.' },
+            ferrocarril: { domain: 'Transporte / Historia', vec: [0.4, 0.7, 0.0, 0.0, 0.3, 0.0, 0.4, 0.0, 0.0, 0.2, 0.9, 0.0, 0.1, 0.3, 0.5, 0.0], insight: 'Los trenes obligaron a estandarizar los husos horarios nacionales.' },
+            mortalidad: { domain: 'Filosofía / Existencialismo', vec: [0.5, 0.0, 0.3, 0.3, 0.0, 0.0, 0.0, 0.85, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.2, 0.8], insight: 'Símbolo clásico del "Memento Mori" y la finitud humana.' },
+            vela: { domain: 'Termodinámica / Historia', vec: [0.3, 0.1, 0.1, 0.2, 0.3, 0.6, 0.1, 0.2, 0.1, 0.85, 0.0, 0.0, 0.0, 0.2, 0.3, 0.4], insight: 'Velas graduadas usadas en la Edad Media para medir vigilias nocturnas.' }
+          }
+        },
+        FUEGO: {
+          obvious: ['fuegos', 'fogata', 'hoguera', 'llama', 'llamas', 'incendio', 'incendios', 'arder', 'quemar', 'calor', 'caliente', 'ceniza', 'cenizas', 'humo', 'brasa', 'brasas', 'chispa', 'chispas'],
+          entries: {
+            prometeo: { domain: 'Mitología Griega', vec: [0.1, 0.1, 0.0, 0.4, 0.2, 0.2, 0.0, 0.4, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.4, 0.95], insight: 'Titán que robó la chispa divina para otorgar tecnología a la humanidad.' },
+            cocina: { domain: 'Gastronomía / Antropología', vec: [0.1, 0.2, 0.4, 0.3, 0.2, 0.1, 0.2, 0.1, 0.2, 0.7, 0.0, 0.3, 0.0, 0.1, 0.8, 0.1], insight: 'La cocción permitió digerir más calorías e impulsar el cerebro humano.' },
+            volcan: { domain: 'Geología', vec: [0.1, 0.0, 0.3, 0.0, 0.7, 0.3, 0.3, 0.0, 0.0, 0.9, 0.0, 0.0, 0.1, 0.85, 0.0, 0.3], insight: 'Fusión magmática del manto terrestre liberada en superficie.' },
+            oxigeno: { domain: 'Química', vec: [0.0, 0.1, 0.6, 0.0, 0.8, 0.1, 0.0, 0.0, 0.2, 0.6, 0.0, 0.4, 0.0, 0.2, 0.0, 0.0], insight: 'Comburente indispensable en la reacción exotérmica de oxidación.' },
+            bosque: { domain: 'Ecología', vec: [0.2, 0.0, 0.95, 0.0, 0.1, 0.1, 0.2, 0.0, 0.2, 0.4, 0.0, 0.0, 0.1, 0.1, 0.0, 0.1], insight: 'Especies pirófitas necesitan incendios periódicos para germinar semillas.' },
+            pasion: { domain: 'Psicología / Emoción', vec: [0.0, 0.0, 0.1, 0.4, 0.2, 0.1, 0.0, 0.95, 0.0, 0.5, 0.0, 0.3, 0.1, 0.0, 0.3, 0.4], insight: 'Metáfora universal de intensidad afectiva e impulso creativo.' },
+            ceramica: { domain: 'Artesanía / Materiales', vec: [0.1, 0.3, 0.1, 0.7, 0.2, 0.0, 0.3, 0.0, 0.2, 0.6, 0.0, 0.0, 0.0, 0.9, 0.3, 0.1], insight: 'Vitrificación de arcilla en hornos para crear recipientes duraderos.' },
+            motor: { domain: 'Ingeniería Mecánica', vec: [0.2, 0.95, 0.0, 0.0, 0.8, 0.0, 0.1, 0.0, 0.0, 0.6, 0.7, 0.0, 0.2, 0.3, 0.0, 0.0], insight: 'Combustión interna controlada que transforma expansión térmica en movimiento.' },
+            fenix: { domain: 'Simbolismo / Literatura', vec: [0.3, 0.0, 0.3, 0.5, 0.1, 0.3, 0.0, 0.4, 0.0, 0.5, 0.1, 0.0, 0.0, 0.0, 0.1, 0.95], insight: 'Ave mítica que simboliza resiliencia y renacimiento tras la destrucción.' },
+            faro: { domain: 'Navegación / Óptica', vec: [0.2, 0.4, 0.0, 0.1, 0.2, 0.9, 0.6, 0.1, 0.4, 0.3, 0.9, 0.0, 0.0, 0.2, 0.2, 0.3], insight: 'Antiguas hogueras en torres costeras guiaban barcos mediante lentes.' },
+            herreria: { domain: 'Metalurgia', vec: [0.1, 0.7, 0.0, 0.2, 0.5, 0.2, 0.1, 0.0, 0.1, 0.8, 0.0, 0.1, 0.3, 0.9, 0.2, 0.2], insight: 'Forja de metales maleables al rojo vivo mediante martillo y yunque.' },
+            dragon: { domain: 'Fantasía / Folclore', vec: [0.0, 0.0, 0.3, 0.6, 0.2, 0.1, 0.0, 0.2, 0.0, 0.6, 0.2, 0.1, 0.0, 0.1, 0.1, 0.95], insight: 'Criatura arquetípica que encarna el poder elemental indomable.' },
+            estrella: { domain: 'Astrofísica', vec: [0.2, 0.0, 0.0, 0.2, 0.95, 0.9, 0.2, 0.1, 0.0, 0.8, 0.3, 0.0, 0.0, 0.1, 0.0, 0.4], insight: 'Fusión nuclear de hidrógeno en plasma a millones de grados.' }
+          }
+        },
+        ESPEJO: {
+          obvious: ['espejos', 'espejismo', 'reflejo', 'reflejos', 'reflejar', 'imagen', 'cristal', 'vidrio', 'mirarse', 'reflexion'],
+          entries: {
+            narciso: { domain: 'Mitología / Psicoanálisis', vec: [0.0, 0.0, 0.2, 0.4, 0.0, 0.4, 0.0, 0.85, 0.5, 0.0, 0.0, 0.2, 0.0, 0.0, 0.2, 0.95], insight: 'Mito griego del joven cautivado por su propia imagen en el agua.' },
+            telescopio: { domain: 'Astronomía / Óptica', vec: [0.1, 0.7, 0.0, 0.1, 0.4, 0.95, 0.2, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.4, 0.0, 0.1], insight: 'Los reflectores cóncavos concentran luz de galaxias lejanas.' },
+            simetria: { domain: 'Matemáticas / Geometría', vec: [0.1, 0.3, 0.3, 0.4, 0.3, 0.5, 0.7, 0.2, 0.0, 0.0, 0.0, 0.2, 0.1, 0.2, 0.0, 0.1], insight: 'Invariancia bajo reflexión axial en grupos geométricos y naturaleza.' },
+            neurona: { domain: 'Neurociencia Social', vec: [0.0, 0.1, 0.8, 0.0, 0.2, 0.1, 0.0, 0.9, 0.0, 0.0, 0.0, 0.8, 0.0, 0.0, 0.7, 0.0], insight: 'Las neuronas espejo permiten la empatía e imitación motora.' },
+            alicia: { domain: 'Literatura (Lewis Carroll)', vec: [0.1, 0.0, 0.1, 0.95, 0.0, 0.3, 0.2, 0.6, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.1, 0.7], insight: 'Portal literario hacia un mundo invertido gobernado por la lógica del ajedrez.' },
+            plata: { domain: 'Química / Metalurgia', vec: [0.0, 0.3, 0.0, 0.2, 0.2, 0.7, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.95, 0.2, 0.1], insight: 'El azogado metálico en el reverso del vidrio maximiza la reflectancia.' },
+            lago: { domain: 'Geografía / Hidrología', vec: [0.1, 0.0, 0.7, 0.2, 0.0, 0.6, 0.3, 0.2, 0.95, 0.0, 0.2, 0.0, 0.0, 0.1, 0.0, 0.2], insight: 'Superficie laminar en calma que funciona como reflector natural perfecto.' },
+            camara: { domain: 'Fotografía / Óptica', vec: [0.2, 0.8, 0.0, 0.6, 0.1, 0.95, 0.1, 0.1, 0.0, 0.0, 0.1, 0.0, 0.0, 0.2, 0.3, 0.0], insight: 'Las cámaras SLR usan un pentaprisma y espejo móvil para el visor.' },
+            laberinto: { domain: 'Arquitectura / Ilusión', vec: [0.1, 0.1, 0.0, 0.4, 0.0, 0.6, 0.9, 0.6, 0.0, 0.0, 0.3, 0.0, 0.0, 0.1, 0.2, 0.6], insight: 'Multiplicación infinita del espacio que desorienta la percepción.' },
+            vampiro: { domain: 'Folclore / Cine', vec: [0.1, 0.0, 0.2, 0.6, 0.0, 0.3, 0.0, 0.3, 0.0, 0.0, 0.0, 0.2, 0.0, 0.1, 0.1, 0.95], insight: 'Mito popular donde la ausencia de alma impide proyectar reflejo.' },
+            laser: { domain: 'Física Fotónica', vec: [0.0, 0.7, 0.0, 0.0, 0.9, 0.95, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0], insight: 'Cavidad resonante entre dos reflectores paralelos amplifica fotones.' }
+          }
+        },
+        PUENTE: {
+          obvious: ['puentes', 'pasarela', 'viaducto', 'cruzar', 'cruce', 'union', 'unir', 'conectar', 'conexion', 'camino', 'carretera'],
+          entries: {
+            odontologia: { domain: 'Medicina Dental', vec: [0.0, 0.4, 0.3, 0.0, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.95, 0.0, 0.4, 0.1, 0.0], insight: 'Prótesis fija anclada a dientes adyacentes para reemplazar piezas ausentes.' },
+            musica: { domain: 'Composición / Guitarra', vec: [0.2, 0.2, 0.0, 0.7, 0.1, 0.0, 0.1, 0.2, 0.0, 0.0, 0.0, 0.0, 0.95, 0.2, 0.1, 0.0], insight: 'Sección de transición en una canción o pieza que sostiene las cuerdas.' },
+            guitarra: { domain: 'Lutería / Acústica', vec: [0.1, 0.3, 0.1, 0.6, 0.2, 0.0, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.95, 0.4, 0.1, 0.0], insight: 'Transmite la vibración de las cuerdas hacia la tapa armónica.' },
+            diplomacia: { domain: 'Relaciones Internacionales', vec: [0.1, 0.0, 0.0, 0.1, 0.0, 0.0, 0.1, 0.5, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.95, 0.3], insight: 'Mediación política que tiende canales de diálogo entre naciones.' },
+            rio: { domain: 'Geografía / Hidrología', vec: [0.1, 0.1, 0.6, 0.1, 0.2, 0.1, 0.5, 0.0, 0.95, 0.0, 0.5, 0.0, 0.0, 0.2, 0.2, 0.2], insight: 'Obstáculo fluvial natural que motiva la ingeniería de arcos.' },
+            sinapsis: { domain: 'Neurobiología', vec: [0.1, 0.1, 0.85, 0.0, 0.5, 0.0, 0.1, 0.7, 0.1, 0.0, 0.1, 0.9, 0.0, 0.0, 0.2, 0.0], insight: 'Brecha microscópica donde neurotransmisores conectan dos neuronas.' },
+            arco: { domain: 'Arquitectura Romana', vec: [0.1, 0.5, 0.0, 0.4, 0.3, 0.0, 0.95, 0.0, 0.1, 0.0, 0.3, 0.0, 0.0, 0.7, 0.2, 0.2], insight: 'Estructura curva que distribuye cargas verticales en compresión lateral.' },
+            traduccion: { domain: 'Lingüística', vec: [0.0, 0.1, 0.0, 0.5, 0.0, 0.0, 0.0, 0.6, 0.0, 0.0, 0.2, 0.0, 0.1, 0.0, 0.9, 0.2], insight: 'Transfiere significado y cultura entre dos sistemas lingüísticos.' },
+            festivo: { domain: 'Calendario / Cultura', vec: [0.85, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.4, 0.0, 0.0, 0.0, 0.8, 0.0], insight: 'Día laborable entre dos festivos que enlaza un descanso prolongado.' },
+            ajedrez: { domain: 'Táctica / Juegos', vec: [0.2, 0.1, 0.0, 0.2, 0.0, 0.0, 0.2, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.3, 0.1], insight: 'Maniobra "construir un puente" en finales de torres para coronar peón.' },
+            nariz: { domain: 'Anatomía Humana', vec: [0.0, 0.0, 0.4, 0.0, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.95, 0.0, 0.2, 0.0, 0.0], insight: 'Parte ósea superior del tabique nasal donde apoyan las gafas.' },
+            redes: { domain: 'Telecomunicaciones', vec: [0.1, 0.95, 0.0, 0.0, 0.4, 0.1, 0.2, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.1, 0.6, 0.0], insight: 'Dispositivo Bridge que interconecta dos segmentos de red informática.' }
+          }
+        }
+      };
+
+      // Palabras claramente inconexas para pruebas rápidas en modo offline
+      const UNRELATED_COMMON = new Set([
+        'hipopotamo', 'lechuga', 'calcetin', 'refrigerador', 'almohada', 'elefante',
+        'zanahoria', 'paraguas', 'tornillo', 'jirafa', 'plato', 'escoba', 'sandia',
+        'pinguino', 'carpeta', 'bicicleta', 'brocoli', 'cepillo', 'toalla', 'canguro'
+      ]);
+
+      function normalizeWord(str) {
+        return str
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zñ]/g, '');
+      }
+
+      function cosineSim(v1, v2) {
+        let dot = 0, n1 = 0, n2 = 0;
+        for (let i = 0; i < v1.length; i++) {
+          dot += v1[i] * v2[i];
+          n1 += v1[i] * v1[i];
+          n2 += v2[i] * v2[i];
+        }
+        if (n1 === 0 || n2 === 0) return 0;
+        return dot / (Math.sqrt(n1) * Math.sqrt(n2));
+      }
+
+      // Evaluador Local Determinista (Fallback)
+      function evaluateWordLocally(coreWord, rawCandidate, existingSatellites) {
+        const normCore = normalizeWord(coreWord);
+        const normCand = normalizeWord(rawCandidate);
+        const lex = LOCAL_LEXICON[coreWord];
+
+        // 1. Chequeo morfológico / Límite de Roche
+        if (
+          normCand === normCore ||
+          normCand.startsWith(normCore.slice(0, 4)) && Math.abs(normCand.length - normCore.length) <= 4 ||
+          lex.obvious.includes(normCand)
+        ) {
+          return {
+            isValidCoreLink: true,
+            isTooObvious: true,
+            gravity: 0.94,
+            pairwiseDistances: existingSatellites.map(() => 0.3),
+            domain: 'Asociación Directa',
+            insight: '',
+            rejectReason: `"${rawCandidate.toUpperCase()}" cae en el Límite de Roche: es demasiado obvia o derivada de ${coreWord}.`
+          };
+        }
+
+        // 2. Búsqueda en lexicón curado
+        if (lex.entries[normCand]) {
+          const entry = lex.entries[normCand];
+          const grav = Math.max(0.32, Math.min(0.78, cosineSim(CORE_CONFIGS[coreWord].vec, entry.vec)));
+          const distances = existingSatellites.map(sat => {
+            if (sat.vec) {
+              const rawDist = 1 - cosineSim(entry.vec, sat.vec);
+              // Escalamos al rango DAT realista [0.22, 0.94]
+              return Number(Math.max(0.22, Math.min(0.95, 0.18 + rawDist * 0.82)).toFixed(3));
+            }
+            return 0.78;
+          });
+
+          return {
+            isValidCoreLink: true,
+            isTooObvious: false,
+            gravity: Number(grav.toFixed(3)),
+            pairwiseDistances: distances,
+            domain: entry.domain,
+            insight: entry.insight,
+            rejectReason: '',
+            vec: entry.vec
+          };
+        }
+
+        // 3. Palabras inconexas conocidas -> Vacío Exterior
+        if (UNRELATED_COMMON.has(normCand) || normCand.length < 3) {
+          return {
+            isValidCoreLink: false,
+            isTooObvious: false,
+            gravity: 0.11,
+            pairwiseDistances: [],
+            domain: 'Sin vínculo',
+            insight: '',
+            rejectReason: `"${rawCandidate.toUpperCase()}" escapa al Vacío Exterior: sin vínculo semántico claro con ${coreWord}.`
+          };
+        }
+
+        // 4. Heurística determinista para cualquier otra palabra válida en español en modo offline
+        let hash = 0;
+        for (let i = 0; i < normCand.length; i++) {
+          hash = ((hash << 5) - hash) + normCand.charCodeAt(i);
+          hash |= 0;
+        }
+        const syntheticVec = Array.from({ length: 16 }, (_, idx) => {
+          const v = Math.abs(Math.sin(hash * (idx + 1) * 0.37));
+          return v > 0.65 ? v : v * 0.25;
+        });
+
+        const grav = 0.36 + (Math.abs(hash % 35) / 100);
+        const distances = existingSatellites.map(sat => {
+          if (sat.vec) {
+            const rawDist = 1 - cosineSim(syntheticVec, sat.vec);
+            return Number(Math.max(0.35, Math.min(0.92, 0.25 + rawDist * 0.75)).toFixed(3));
+          }
+          return 0.76;
+        });
+
+        return {
+          isValidCoreLink: true,
+          isTooObvious: false,
+          gravity: Number(grav.toFixed(3)),
+          pairwiseDistances: distances,
+          domain: 'Asociación Abierta',
+          insight: `Puente conceptual exploratorio entre ${rawCandidate.toUpperCase()} y ${coreWord}.`,
+          rejectReason: '',
+          vec: syntheticVec
+        };
+      }
+
+      // =========================================================================
+      // 4. MOTOR SEMÁNTICO CON GEMINI API (CON EXPONENTIAL BACKOFF Y FALLBACK)
+      // =========================================================================
+      async function evaluateWordSemantic(coreWord, candidateWord, existingSatellites) {
+        const normCore = normalizeWord(coreWord);
+        const normCand = normalizeWord(candidateWord);
+        const lex = LOCAL_LEXICON[coreWord];
+
+        // Filtro instantáneo de derivados morfológicos obvios antes de gastar red
+        if (
+          normCand === normCore ||
+          (normCand.startsWith(normCore.slice(0, 4)) && Math.abs(normCand.length - normCore.length) <= 4) ||
+          lex.obvious.includes(normCand)
+        ) {
+          return evaluateWordLocally(coreWord, candidateWord, existingSatellites);
+        }
+
+        const apiKey = ""; // Inyectado automáticamente en tiempo de ejecución
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const prevWords = existingSatellites.map(s => s.word);
+        const systemPrompt = `Eres el motor psicométrico de "ÓRBITA", un laboratorio científico inspirado en el Divergent Association Task (DAT) de Harvard.
+Evalúa si una palabra candidata en español tiene un vínculo real con la Palabra Núcleo (w0) y calcula su distancia semántica (1 - similitud coseno) respecto a los satélites ya colocados.
+
+REGLAS ESTRICTAS:
+1. isTooObvious = true si la palabra candidata es plural, diminutivo, misma raíz léxica o sinónimo directo/trivial del Núcleo (ej. para RELOJ: "relojes", "hora", "tiempo", "minuto", "aguja").
+2. isValidCoreLink = true si existe un vínculo real funcional, metafórico, cultural, histórico, científico o simbólico con el Núcleo (ej. para RELOJ: "arena", "dalí", "biología", "cuco", "cuarzo", "ajedrez" son VÁLIDAS). Si es completamente aleatoria sin relación (ej. "hipopótamo", "lechuga"), isValidCoreLink = false.
+3. gravity (0.25 a 0.90): fuerza de afinidad con el Núcleo (0.65-0.80 conexiones directas válidas; 0.30-0.55 metáforas o saltos abstractos).
+4. pairwiseDistances: array con EXACTAMENTE ${prevWords.length} números (uno por cada satélite previo en orden). Mide la distancia semántica (0.15 a 0.98):
+   - Penaliza fuertemente (< 0.45) palabras del mismo campo semántico inmediato (ej. "hora" y "minuto" ~ 0.25; "arena" y "playa" ~ 0.30).
+   - Premia (> 0.78) saltos entre dominios completamente distintos (ej. "arena" y "surrealismo" ~ 0.89; "biología" y "cuarzo" ~ 0.84).
+5. domain: categoría breve de 1-2 palabras (ej. "Arte Surrealista", "Cronobiología").
+6. insight: explicación brillante en español de máximo 12 palabras sobre el puente conceptual con el núcleo.
+7. rejectReason: si isTooObvious es true o isValidCoreLink es false, explica brevemente en español por qué fue rechazada.`;
+
+        const userQuery = JSON.stringify({
+          coreWord: coreWord,
+          candidateWord: candidateWord.trim(),
+          existingSatellites: prevWords
+        });
+
+        const payload = {
+          contents: [{ parts: [{ text: userQuery }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                isValidCoreLink: { type: "BOOLEAN" },
+                isTooObvious: { type: "BOOLEAN" },
+                gravity: { type: "NUMBER" },
+                pairwiseDistances: {
+                  type: "ARRAY",
+                  items: { type: "NUMBER" }
+                },
+                domain: { type: "STRING" },
+                insight: { type: "STRING" },
+                rejectReason: { type: "STRING" }
+              },
+              required: [
+                "isValidCoreLink",
+                "isTooObvious",
+                "gravity",
+                "pairwiseDistances",
+                "domain",
+                "insight",
+                "rejectReason"
+              ]
+            }
+          }
+        };
+
+        // Intentar Gemini API con backoff exponencial (máx 2 reintentos rápidos) y timeout
+        const delays = [600, 1400];
+        for (let attempt = 0; attempt <= delays.length; attempt++) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5500);
+
+          try {
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!rawText) throw new Error('Respuesta vacía');
+
+            const parsed = JSON.parse(rawText);
+
+            // Sanitizar y asegurar integridad matemática
+            const clampedGravity = Math.max(0.25, Math.min(0.90, Number(parsed.gravity) || 0.5));
+            const rawDistances = Array.isArray(parsed.pairwiseDistances) ? parsed.pairwiseDistances : [];
+            const sanitizedDistances = existingSatellites.map((_, i) => {
+              const val = Number(rawDistances[i]);
+              if (Number.isFinite(val)) {
+                return Number(Math.max(0.15, Math.min(0.98, val)).toFixed(3));
+              }
+              return 0.75;
+            });
+
+            // También adjuntamos vector local si existe para enriquecer
+            const localEntry = lex.entries[normCand];
+
+            return {
+              isValidCoreLink: Boolean(parsed.isValidCoreLink),
+              isTooObvious: Boolean(parsed.isTooObvious),
+              gravity: Number(clampedGravity.toFixed(3)),
+              pairwiseDistances: sanitizedDistances,
+              domain: (parsed.domain || 'Conexión Conceptual').slice(0, 28),
+              insight: (parsed.insight || `Vínculo creativo entre ${candidateWord.toUpperCase()} y ${coreWord}.`).slice(0, 95),
+              rejectReason: parsed.rejectReason || `Concepto incompatible con la órbita de ${coreWord}.`,
+              vec: localEntry ? localEntry.vec : null,
+              source: 'gemini'
+            };
+          } catch (err) {
+            clearTimeout(timeoutId);
+            if (attempt < delays.length) {
+              await new Promise(res => setTimeout(res, delays[attempt]));
+            }
+          }
+        }
+
+        // Fallback silencioso y determinista si la API no está disponible
+        const fallbackResult = evaluateWordLocally(coreWord, candidateWord, existingSatellites);
+        fallbackResult.source = 'local';
+        return fallbackResult;
+      }
+
+      // =========================================================================
+      // 5. ESTADO GLOBAL DE LA SIMULACIÓN
+      // =========================================================================
+      const state = {
+        coreWord: 'RELOJ',
+        satellites: [], // { id, word, domain, gravity, insight, color, angle, angularVel, targetRadius, currentRadius, pulsePhase, vec }
+        distanceMatrix: {}, // key: `${id1}-${id2}` -> float (0.15..0.98)
+        rejectedHistory: [], // { word, type: 'roche'|'void', reason }
+        transientAnimations: [], // partículas de rechazo, ondas expansivas, estrellas fugaces
+        isEvaluating: false,
+        hoveredItem: null, // { type: 'node'|'edge', data, x, y }
+        radarSweepAngle: 0,
+        lastFrameTime: performance.now()
+      };
+
+      // =========================================================================
+      // 6. REFERENCIAS AL DOM Y UTILIDADES DE INTERFAZ
+      // =========================================================================
+      const canvas = document.getElementById('radarCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasWrapper = document.getElementById('canvasWrapper');
+      const tooltipEl = document.getElementById('canvasTooltip');
+      const tooltipHeader = document.getElementById('tooltipHeader');
+      const tooltipBody = document.getElementById('tooltipBody');
+      const tooltipMeta = document.getElementById('tooltipMeta');
+      const radarToast = document.getElementById('radarToast');
+
+      const launchForm = document.getElementById('launchForm');
+      const wordInput = document.getElementById('wordInput');
+      const inputCounter = document.getElementById('inputCounter');
+      const launchBtn = document.getElementById('launchBtn');
+      const launchBtnText = document.getElementById('launchBtnText');
+      const launchBtnIcon = document.getElementById('launchBtnIcon');
+      const launchSpinner = document.getElementById('launchSpinner');
+      const promptHint = document.getElementById('promptHint');
+
+      const engineDot = document.getElementById('engineDot');
+      const engineText = document.getElementById('engineText');
+
+      const orbitCountText = document.getElementById('orbitCountText');
+      const slotDots = document.getElementById('slotDots');
+      const datScoreText = document.getElementById('datScoreText');
+      const datPairsText = document.getElementById('datPairsText');
+      const scoreProgressBar = document.getElementById('scoreProgressBar');
+      const tensionBadge = document.getElementById('tensionBadge');
+      const tensionDescription = document.getElementById('tensionDescription');
+      const satelliteList = document.getElementById('satelliteList');
+      const emptyListPlaceholder = document.getElementById('emptyListPlaceholder');
+      const rejectedCountBadge = document.getElementById('rejectedCountBadge');
+
+      const finalResultCard = document.getElementById('finalResultCard');
+      const finalPercentile = document.getElementById('finalPercentile');
+      const finalScoreValue = document.getElementById('finalScoreValue');
+      const finalRankBadge = document.getElementById('finalRankBadge');
+      const sharePreviewBox = document.getElementById('sharePreviewBox');
+      const copyResultBtn = document.getElementById('copyResultBtn');
+      const copyBtnText = document.getElementById('copyBtnText');
+      const nextCoreBtn = document.getElementById('nextCoreBtn');
+
+      const helpModal = document.getElementById('helpModal');
+
+      let toastTimer = null;
+      function showRadarToast(message, variant = 'info') {
+        clearTimeout(toastTimer);
+        radarToast.textContent = message;
+        radarToast.className = 'pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 z-20 max-w-md w-[90%] sm:w-auto px-4 py-2.5 rounded-xl border backdrop-blur-md shadow-2xl text-xs sm:text-sm font-medium text-center animate-entry ';
+        
+        if (variant === 'roche') {
+          radarToast.className += 'bg-rose-950/90 border-rose-500/60 text-rose-200';
+        } else if (variant === 'void') {
+          radarToast.className += 'bg-slate-900/95 border-slate-500/60 text-slate-200';
+        } else if (variant === 'success') {
+          radarToast.className += 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200';
+        } else {
+          radarToast.className += 'bg-cyan-950/90 border-cyan-500/50 text-cyan-200';
+        }
+
+        radarToast.classList.remove('hidden');
+        toastTimer = setTimeout(() => {
+          radarToast.classList.add('hidden');
+        }, 3800);
+      }
+
+      function setEvaluatingUI(loading) {
+        state.isEvaluating = loading;
+        launchBtn.disabled = loading || state.satellites.length >= 5;
+        wordInput.disabled = loading || state.satellites.length >= 5;
+        if (loading) {
+          launchBtnText.textContent = 'Analizando';
+          launchBtnIcon.classList.add('hidden');
+          launchSpinner.classList.remove('hidden');
+          engineDot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
+          engineText.textContent = 'Calculando vector semántico...';
+        } else {
+          launchBtnText.textContent = state.satellites.length >= 5 ? 'Completo' : 'Lanzar';
+          launchBtnIcon.classList.remove('hidden');
+          launchSpinner.classList.add('hidden');
+          engineDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          engineText.textContent = 'Motor Semántico Listo';
+          if (state.satellites.length < 5) {
+            wordInput.focus();
+          }
+        }
+      }
+
+      // =========================================================================
+      // 7. CÁLCULO DE MÉTRICAS DAT Y ACTUALIZACIÓN DE TELEMETRÍA
+      // =========================================================================
+      function getPairKey(idA, idB) {
+        return idA < idB ? `${idA}-${idB}` : `${idB}-${idA}`;
+      }
+
+      function computeTelemetryStats() {
+        const sats = state.satellites;
+        const n = sats.length;
+        if (n < 2) {
+          return {
+            pairCount: 0,
+            avgDistance: 0,
+            datScore: 0,
+            closestPair: null,
+            farthestPair: null,
+            redTensionCount: 0
+          };
+        }
+
+        let sum = 0;
+        let count = 0;
+        let closestPair = { a: null, b: null, dist: 2 };
+        let farthestPair = { a: null, b: null, dist: -1 };
+        let redTensionCount = 0;
+
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            const d = state.distanceMatrix[getPairKey(sats[i].id, sats[j].id)] ?? 0.75;
+            sum += d;
+            count++;
+            if (d < 0.58) redTensionCount++;
+            if (d < closestPair.dist) {
+              closestPair = { a: sats[i], b: sats[j], dist: d };
+            }
+            if (d > farthestPair.dist) {
+              farthestPair = { a: sats[i], b: sats[j], dist: d };
+            }
+          }
+        }
+
+        const avgDistance = sum / count;
+        const datScore = Number((avgDistance * 100).toFixed(1));
+
+        return {
+          pairCount: count,
+          avgDistance,
+          datScore,
+          closestPair,
+          farthestPair,
+          redTensionCount
+        };
+      }
+
+      function getRankInfo(score) {
+        if (score >= 85) {
+          const pct = Math.min(99, Math.round(88 + (score - 85) * 0.8));
+          return { title: 'Arquitecto Divergente', percentile: `Top ${100 - pct}% · Superas al ${pct}%`, color: 'text-emerald-300' };
+        }
+        if (score >= 78) {
+          const pct = Math.round(65 + ((score - 78) / 7) * 22);
+          return { title: 'Mente Bisociativa', percentile: `Superas al ${pct}% de los jugadores`, color: 'text-cyan-300' };
+        }
+        if (score >= 68) {
+          const pct = Math.round(35 + ((score - 68) / 10) * 29);
+          return { title: 'Explorador Asociativo', percentile: `Superas al ${pct}% de los jugadores`, color: 'text-amber-300' };
+        }
+        const pct = Math.max(8, Math.round((score / 68) * 34));
+        return { title: 'Pensamiento Lineal', percentile: `Percentil ${pct}% · Intenta saltar de dominio`, color: 'text-rose-300' };
+      }
+
+      function updateTelemetryUI() {
+        const n = state.satellites.length;
+        const stats = computeTelemetryStats();
+
+        // Actualizar contadores
+        orbitCountText.innerHTML = `${n}<span class="text-slate-500 text-base">/5</span>`;
+        inputCounter.textContent = `${n}/5`;
+
+        // Puntos de ranuras
+        const dots = slotDots.children;
+        for (let i = 0; i < 5; i++) {
+          if (i < n) {
+            dots[i].style.backgroundColor = state.satellites[i].color.hex;
+            dots[i].className = 'w-2.5 h-2.5 rounded-full transition-all shadow-sm';
+          } else {
+            dots[i].style.backgroundColor = '';
+            dots[i].className = 'w-2 h-2 rounded-full bg-slate-800 transition-all';
+          }
+        }
+
+        // Puntaje DAT en vivo
+        if (n < 2) {
+          datScoreText.textContent = '--';
+          datPairsText.textContent = '0 pares';
+          scoreProgressBar.style.width = '0%';
+        } else {
+          datScoreText.textContent = stats.datScore.toFixed(1);
+          datPairsText.textContent = `${stats.pairCount} ${stats.pairCount === 1 ? 'par' : 'pares'}`;
+          scoreProgressBar.style.width = `${Math.min(100, Math.max(5, stats.datScore))}%`;
+        }
+
+        // Alerta de Tensión Semántica
+        if (n < 2) {
+          tensionBadge.textContent = 'En espera';
+          tensionBadge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+          tensionDescription.textContent = 'Lanza al menos 2 satélites para medir la distancia coseno entre tus conceptos.';
+        } else {
+          const { a, b, dist } = stats.closestPair;
+          if (dist < 0.58) {
+            tensionBadge.textContent = `Fricción d=${dist.toFixed(2)}`;
+            tensionBadge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40';
+            tensionDescription.innerHTML = `Par más cercano: <strong class="text-rose-300">${a.word}</strong> y <strong class="text-rose-300">${b.word}</strong> comparten cercanía semántica (d = ${dist.toFixed(2)}). Busca dominios más opuestos.`;
+          } else if (dist < 0.76) {
+            tensionBadge.textContent = `Estable d=${dist.toFixed(2)}`;
+            tensionBadge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40';
+            tensionDescription.innerHTML = `Par más cercano: <strong class="text-slate-200">${a.word}</strong> y <strong class="text-slate-200">${b.word}</strong> (d = ${dist.toFixed(2)}). Buena separación conceptual.`;
+          } else {
+            tensionBadge.textContent = `Resonancia d=${dist.toFixed(2)}`;
+            tensionBadge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            tensionDescription.innerHTML = `Constelación ortogonal: incluso tu par más cercano (<strong class="text-emerald-300">${a.word}</strong> – <strong class="text-emerald-300">${b.word}</strong>) mantiene d = ${dist.toFixed(2)}.`;
+          }
+        }
+
+        // Bitácora de satélites lanzados
+        rejectedCountBadge.textContent = `${state.rejectedHistory.length} ${state.rejectedHistory.length === 1 ? 'rechazo' : 'rechazos'}`;
+        
+        if (n === 0 && state.rejectedHistory.length === 0) {
+          satelliteList.innerHTML = '';
+          satelliteList.appendChild(emptyListPlaceholder);
+        } else {
+          satelliteList.innerHTML = '';
+          // Mostrar satélites activos en orden inverso (el más reciente arriba)
+          [...state.satellites].reverse().forEach((sat) => {
+            const card = document.createElement('div');
+            card.className = 'bg-[#070B14]/90 border border-[#1E293B] hover:border-slate-700 rounded-xl p-3 transition-all animate-entry';
+            card.innerHTML = `
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${sat.color.hex}; box-shadow: 0 0 8px ${sat.color.hex}"></span>
+                  <span class="font-mono font-bold text-xs sm:text-sm text-white tracking-wide">${sat.word}</span>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800/90 text-slate-300 border border-slate-700/70">
+                  ${sat.domain}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed pl-4">${sat.insight}</p>
+            `;
+            satelliteList.appendChild(card);
+          });
+
+          // Mostrar últimos rechazos si los hay
+          if (state.rejectedHistory.length > 0) {
+            const recentRejects = state.rejectedHistory.slice(-2).reverse();
+            recentRejects.forEach(rej => {
+              const rCard = document.createElement('div');
+              const isRoche = rej.type === 'roche';
+              rCard.className = `rounded-xl p-2.5 border text-[11px] opacity-80 ${
+                isRoche
+                  ? 'bg-rose-950/20 border-rose-900/50 text-rose-300'
+                  : 'bg-slate-900/40 border-slate-800 text-slate-400'
+              }`;
+              rCard.innerHTML = `
+                <div class="flex items-center justify-between font-mono text-[10px] mb-0.5">
+                  <span>${isRoche ? '⚠️ LÍMITE DE ROCHE' : '🌌 VACÍO EXTERIOR'}</span>
+                  <span class="line-through">${rej.word}</span>
+                </div>
+                <p class="text-[10px] opacity-90">${rej.reason}</p>
+              `;
+              satelliteList.appendChild(rCard);
+            });
+          }
+        }
+
+        // Tarjeta de Resultado Final al completar 5/5
+        if (n === 5) {
+          const rank = getRankInfo(stats.datScore);
+          finalScoreValue.textContent = stats.datScore.toFixed(1);
+          finalPercentile.textContent = rank.percentile;
+          finalRankBadge.textContent = `Rango: ${rank.title}`;
+          finalRankBadge.className = `inline-block text-sm font-semibold mb-3 ${rank.color}`;
+
+          const emojis = state.satellites.map(s => s.color.emoji).join(' ');
+          const collisionStatus = stats.redTensionCount === 0
+            ? 'Sin colisiones'
+            : `${stats.redTensionCount} ${stats.redTensionCount === 1 ? 'fricción' : 'fricciones'}`;
+
+          const shareText = `🪐 ÓRBITA — Núcleo: ${state.coreWord}\nÍndice Divergente: ${stats.datScore.toFixed(1)} / 100 (${rank.title})\n${emojis} — ${collisionStatus}`;
+          sharePreviewBox.textContent = shareText;
+
+          finalResultCard.classList.remove('hidden');
+          wordInput.placeholder = 'Órbita completada. Copia tu resultado o prueba otro núcleo.';
+          wordInput.disabled = true;
+          launchBtn.disabled = true;
+          launchBtnText.textContent = 'Completo';
+        } else {
+          finalResultCard.classList.add('hidden');
+          wordInput.disabled = false;
+          launchBtn.disabled = false;
+          launchBtnText.textContent = 'Lanzar';
+        }
+      }
+
+      // =========================================================================
+      // 8. FÍSICA ORBITAL Y RENDERIZADO EN HTML5 CANVAS
+      // =========================================================================
+      let canvasWidth = 0;
+      let canvasHeight = 0;
+      let dpr = 1;
+
+      // Estrellas ambientales de fondo
+      const backgroundStars = Array.from({ length: 75 }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random() * 1.4 + 0.4,
+        alpha: Math.random() * 0.45 + 0.1,
+        twinkleSpeed: Math.random() * 1.5 + 0.5
+      }));
+
+      function resizeCanvas() {
+        const rect = canvasWrapper.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvasWidth = rect.width;
+        canvasHeight = rect.height;
+        canvas.width = Math.floor(canvasWidth * dpr);
+        canvas.height = Math.floor(canvasHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      const resizeObserver = new ResizeObserver(() => resizeCanvas());
+      resizeObserver.observe(canvasWrapper);
+      window.addEventListener('resize', resizeCanvas);
+
+      function getRadarGeometry() {
+        const cx = canvasWidth / 2;
+        const cy = canvasHeight / 2;
+        const maxR = Math.max(115, Math.min(canvasWidth, canvasHeight) * 0.43);
+        return {
+          cx,
+          cy,
+          maxR,
+          rocheR: maxR * 0.25,     // Anillo interior rojo (obvio)
+          stableInnerR: maxR * 0.33,
+          stableOuterR: maxR * 0.84,
+          voidR: maxR * 0.88       // Anillo exterior (sin vínculo)
+        };
+      }
+
+      // Mapea gravedad [0.25 .. 0.88] -> radio orbital en zona estable (menor gravedad = salto más profundo = más lejos del centro)
+      function mapGravityToOrbitRatio(gravity) {
+        const clamped = Math.max(0.25, Math.min(0.88, gravity));
+        const normalizedAbstractness = 1 - (clamped - 0.25) / (0.88 - 0.25); // 0 (cerca) a 1 (lejos)
+        return 0.35 + normalizedAbstractness * 0.47; // Entre 35% y 82% de maxR
+      }
+
+      function spawnRejectionAnimation(word, type) {
+        const { cx, cy, maxR, rocheR, voidR } = getRadarGeometry();
+        const angle = Math.random() * Math.PI * 2;
+        const particles = Array.from({ length: 18 }, () => ({
+          angle: angle + (Math.random() - 0.5) * 0.6,
+          speed: 30 + Math.random() * 90,
+          life: 1.0,
+          size: 1.5 + Math.random() * 2.5
+        }));
+
+        state.transientAnimations.push({
+          type, // 'roche' o 'void'
+          word: word.toUpperCase(),
+          angle,
+          progress: 0,
+          duration: 1.35,
+          startR: type === 'roche' ? rocheR * 1.35 : voidR * 0.82,
+          endR: type === 'roche' ? 8 : maxR * 1.28,
+          particles,
+          cx,
+          cy
+        });
+      }
+
+      function updatePhysics(dt) {
+        const sats = state.satellites;
+        const n = sats.length;
+
+        // Barrido sutil del radar
+        state.radarSweepAngle = (state.radarSweepAngle + dt * 0.35) % (Math.PI * 2);
+
+        // 1. Repulsión angular mutua entre satélites para equilibrio de constelación
+        if (n > 1) {
+          for (let i = 0; i < n; i++) {
+            let angularForce = 0;
+            for (let j = 0; j < n; j++) {
+              if (i === j) continue;
+              let diff = sats[i].angle - sats[j].angle;
+              // Normalizar diferencia angular a [-PI, PI]
+              while (diff > Math.PI) diff -= Math.PI * 2;
+              while (diff < -Math.PI) diff += Math.PI * 2;
+
+              const absDiff = Math.max(0.18, Math.abs(diff));
+              const sign = diff >= 0 ? 1 : -1;
+              // Fuerza de repulsión inversamente proporcional a la separación angular
+              angularForce += sign * (0.65 / (absDiff * absDiff));
+            }
+            sats[i].angularVel = sats[i].angularVel * 0.88 + angularForce * dt * 0.35;
+          }
+        }
+
+        // 2. Actualizar posición orbital suave y radio elástico
+        const baseOrbitSpeed = 0.085; // Rotación orbital contemplativa
+        for (let i = 0; i < n; i++) {
+          const s = sats[i];
+          s.angle += (baseOrbitSpeed + s.angularVel) * dt;
+          s.currentRadius += (s.targetRadius - s.currentRadius) * Math.min(1, dt * 6);
+          s.pulsePhase = (s.pulsePhase + dt * 2.4) % (Math.PI * 2);
+        }
+
+        // 3. Actualizar animaciones transitorias de rechazo
+        for (let i = state.transientAnimations.length - 1; i >= 0; i--) {
+          const anim = state.transientAnimations[i];
+          anim.progress += dt / anim.duration;
+          if (anim.type === 'roche') {
+            anim.angle += dt * 4.5; // Espiral hacia el núcleo
+          }
+          anim.particles.forEach(p => {
+            p.life -= dt * 0.95;
+          });
+          if (anim.progress >= 1) {
+            state.transientAnimations.splice(i, 1);
+          }
+        }
+      }
+
+      function renderCanvas(now) {
+        const dt = Math.min(0.05, (now - state.lastFrameTime) / 1000);
+        state.lastFrameTime = now;
+
+        updatePhysics(dt);
+
+        const { cx, cy, maxR, rocheR, voidR } = getRadarGeometry();
+        const coreCfg = CORE_CONFIGS[state.coreWord];
+
+        // Limpiar lienzo
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        // 1. Campo estelar sutil
+        const timeSec = now * 0.001;
+        backgroundStars.forEach(star => {
+          const alpha = star.alpha * (0.65 + 0.35 * Math.sin(timeSec * star.twinkleSpeed));
+          ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(star.x * canvasWidth, star.y * canvasHeight, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // 2. Gradiente ambiental de la Zona Orbital Estable
+        const zoneGrad = ctx.createRadialGradient(cx, cy, rocheR, cx, cy, voidR);
+        zoneGrad.addColorStop(0, 'rgba(244, 63, 94, 0.07)');
+        zoneGrad.addColorStop(0.18, 'rgba(6, 182, 212, 0.05)');
+        zoneGrad.addColorStop(0.85, 'rgba(16, 185, 129, 0.03)');
+        zoneGrad.addColorStop(1, 'rgba(7, 11, 20, 0)');
+        ctx.fillStyle = zoneGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, voidR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Ejes cardinales sutiles del observatorio
+        ctx.strokeStyle = 'rgba(30, 41, 59, 0.55)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - voidR * 1.06, cy);
+        ctx.lineTo(cx + voidR * 1.06, cy);
+        ctx.moveTo(cx, cy - voidR * 1.06);
+        ctx.lineTo(cx, cy + voidR * 1.06);
+        ctx.stroke();
+
+        // 4. Barrido de radar ultra-sutil
+        const sweepGrad = ctx.createConicGradient(state.radarSweepAngle, cx, cy);
+        sweepGrad.addColorStop(0, 'rgba(34, 211, 238, 0.06)');
+        sweepGrad.addColorStop(0.12, 'rgba(34, 211, 238, 0)');
+        sweepGrad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+        ctx.fillStyle = sweepGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, voidR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 5. Anillos orbitales intermedios (guías de profundidad conceptual)
+        [0.48, 0.66].forEach(ratio => {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(30, 41, 59, 0.7)';
+          ctx.setLineDash([2, 6]);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(cx, cy, maxR * ratio, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        // 6. Anillo Interior: LÍMITE DE ROCHE (Rojo tenue punteado)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rocheR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Etiqueta sutil del Límite de Roche
+        ctx.fillStyle = 'rgba(251, 113, 133, 0.65)';
+        ctx.font = '500 9px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('LÍMITE DE ROCHE', cx, cy + rocheR + 12);
+
+        // 7. Anillo Exterior: VACÍO EXTERIOR (Punteado)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, voidR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
+        ctx.font = '500 9px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('VACÍO EXTERIOR', cx, cy - voidR - 8);
+
+        // Calcular posiciones 2D actuales de los satélites
+        const nodePositions = state.satellites.map(sat => {
+          const rPx = sat.currentRadius * maxR;
+          return {
+            sat,
+            x: cx + Math.cos(sat.angle) * rPx,
+            y: cy + Math.sin(sat.angle) * rPx,
+            rPx
+          };
+        });
+
+        // 8. Rayos gravitacionales tenues desde el núcleo hacia cada satélite
+        nodePositions.forEach(({ sat, x, y }) => {
+          const gravGrad = ctx.createLinearGradient(cx, cy, x, y);
+          gravGrad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
+          gravGrad.addColorStop(1, 'rgba(34, 211, 238, 0.08)');
+          ctx.strokeStyle = gravGrad;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        });
+
+        // 9. Líneas de Energía / Tensión entre cada par de satélites
+        const edgeHitTargets = [];
+        for (let i = 0; i < nodePositions.length; i++) {
+          for (let j = i + 1; j < nodePositions.length; j++) {
+            const p1 = nodePositions[i];
+            const p2 = nodePositions[j];
+            const d = state.distanceMatrix[getPairKey(p1.sat.id, p2.sat.id)] ?? 0.75;
+
+            const isHoveredEdge =
+              state.hoveredItem?.type === 'edge' &&
+              state.hoveredItem.data.key === getPairKey(p1.sat.id, p2.sat.id);
+
+            ctx.save();
+            if (d >= 0.76) {
+              // Alta divergencia: Cian / Esmeralda brillante
+              ctx.strokeStyle = isHoveredEdge ? '#6EE7B7' : 'rgba(16, 185, 129, 0.62)';
+              ctx.lineWidth = isHoveredEdge ? 2.8 : 1.7;
+              ctx.shadowColor = 'rgba(16, 185, 129, 0.45)';
+              ctx.shadowBlur = isHoveredEdge ? 12 : 6;
+            } else if (d >= 0.58) {
+              // Distancia media: Azul tenue
+              ctx.strokeStyle = isHoveredEdge ? '#7DD3FC' : 'rgba(56, 189, 248, 0.34)';
+              ctx.lineWidth = isHoveredEdge ? 2.4 : 1.3;
+            } else {
+              // Colisión conceptual / Fricción (d < 0.58): Rojo / Ámbar pulsante
+              const pulse = 0.55 + 0.45 * Math.sin(timeSec * 6);
+              ctx.strokeStyle = isHoveredEdge
+                ? '#FCA5A5'
+                : `rgba(244, 63, 94, ${0.45 + pulse * 0.45})`;
+              ctx.lineWidth = isHoveredEdge ? 3.2 : 2.1;
+              ctx.setLineDash([6, 4]);
+              ctx.lineDashOffset = -timeSec * 24;
+              ctx.shadowColor = 'rgba(244, 63, 94, 0.55)';
+              ctx.shadowBlur = 10;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            ctx.restore();
+
+            // Etiqueta pequeña con distancia en el punto medio si está en hover o en fricción
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            edgeHitTargets.push({
+              key: getPairKey(p1.sat.id, p2.sat.id),
+              satA: p1.sat,
+              satB: p2.sat,
+              dist: d,
+              x1: p1.x,
+              y1: p1.y,
+              x2: p2.x,
+              y2: p2.y,
+              midX,
+              midY
+            });
+
+            if (d < 0.58 || isHoveredEdge) {
+              ctx.save();
+              ctx.fillStyle = '#070B14';
+              ctx.strokeStyle = d < 0.58 ? 'rgba(244, 63, 94, 0.7)' : 'rgba(34, 211, 238, 0.7)';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.roundRect(midX - 20, midY - 9, 40, 18, 6);
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = d < 0.58 ? '#FDA4AF' : '#A5F3FC';
+              ctx.font = '600 9.5px "JetBrains Mono", monospace';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(`d:${d.toFixed(2)}`, midX, midY + 0.5);
+              ctx.restore();
+            }
+          }
+        }
+
+        // 10. Animaciones Transitorias de Rechazo (Límite de Roche y Vacío Exterior)
+        state.transientAnimations.forEach(anim => {
+          const ease = 1 - Math.pow(1 - anim.progress, 3);
+          const curR = anim.startR + (anim.endR - anim.startR) * ease;
+          const px = anim.cx + Math.cos(anim.angle) * curR;
+          const py = anim.cy + Math.sin(anim.angle) * curR;
+          const alpha = Math.max(0, 1 - anim.progress);
+
+          ctx.save();
+          if (anim.type === 'roche') {
+            // Destello rojo en Límite de Roche + nodo cayendo al centro
+            ctx.strokeStyle = `rgba(244, 63, 94, ${alpha * 0.8})`;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(anim.cx, anim.cy, rocheR * (1 - anim.progress * 0.25), 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = `rgba(244, 63, 94, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 7 * (1 - anim.progress * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // Estela de partículas escapando al Vacío Exterior
+            anim.particles.forEach(p => {
+              if (p.life <= 0) return;
+              const distOffset = (1 - p.life) * 38;
+              const partX = px - Math.cos(p.angle) * distOffset;
+              const partY = py - Math.sin(p.angle) * distOffset;
+              ctx.fillStyle = `rgba(148, 163, 184, ${p.life * alpha * 0.85})`;
+              ctx.beginPath();
+              ctx.arc(partX, partY, p.size, 0, Math.PI * 2);
+              ctx.fill();
+            });
+
+            ctx.fillStyle = `rgba(203, 213, 225, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.fillStyle = anim.type === 'roche'
+            ? `rgba(253, 164, 175, ${alpha})`
+            : `rgba(203, 213, 225, ${alpha})`;
+          ctx.font = '600 11px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(anim.word, px, py - 12);
+          ctx.restore();
+        });
+
+        // 11. Nodo Central: PALABRA NÚCLEO (w0)
+        const corePulse = 1 + 0.04 * Math.sin(timeSec * 2.5);
+        const coreGlow = ctx.createRadialGradient(cx, cy, 4, cx, cy, 46 * corePulse);
+        coreGlow.addColorStop(0, 'rgba(245, 158, 11, 0.55)');
+        coreGlow.addColorStop(0.55, 'rgba(245, 158, 11, 0.14)');
+        coreGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = coreGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 46 * corePulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Disco central del Núcleo
+        ctx.save();
+        ctx.fillStyle = '#0D1424';
+        ctx.strokeStyle = coreCfg.accent;
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = coreCfg.accent;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 29, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '700 11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(state.coreWord, cx, cy);
+
+        // 12. Nodos de Satélites en Órbita
+        nodePositions.forEach(({ sat, x, y }) => {
+          const isHovered =
+            state.hoveredItem?.type === 'node' && state.hoveredItem.data.id === sat.id;
+          const nodeRadius = isHovered ? 11.5 : 9;
+
+          // Halo exterior
+          const halo = ctx.createRadialGradient(x, y, 2, x, y, nodeRadius * 2.6);
+          halo.addColorStop(0, sat.color.glow);
+          halo.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(x, y, nodeRadius * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Cuerpo del satélite
+          ctx.save();
+          ctx.fillStyle = '#070B14';
+          ctx.strokeStyle = sat.color.hex;
+          ctx.lineWidth = isHovered ? 3 : 2.2;
+          ctx.shadowColor = sat.color.hex;
+          ctx.shadowBlur = isHovered ? 16 : 8;
+          ctx.beginPath();
+          ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Punto interior brillante
+          ctx.fillStyle = sat.color.hex;
+          ctx.beginPath();
+          ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          // Etiqueta legible estilo cápsula debajo del nodo
+          ctx.save();
+          ctx.font = '600 11px "JetBrains Mono", monospace';
+          const textMetrics = ctx.measureText(sat.word);
+          const padX = 8;
+          const boxW = textMetrics.width + padX * 2;
+          const boxH = 20;
+          const boxX = x - boxW / 2;
+          const boxY = y + nodeRadius + 6;
+
+          ctx.fillStyle = 'rgba(7, 11, 20, 0.88)';
+          ctx.strokeStyle = isHovered ? sat.color.hex : 'rgba(51, 65, 85, 0.85)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(boxX, boxY, boxW, boxH, 7);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#F8FAFC';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(sat.word, x, boxY + boxH / 2 + 0.5);
+          ctx.restore();
+        });
+
+        // Guardar targets interactivos para detección de hover / tap
+        canvas._hitNodes = nodePositions;
+        canvas._hitEdges = edgeHitTargets;
+
+        requestAnimationFrame(renderCanvas);
+      }
+
+      // =========================================================================
+      // 9. DETECCIÓN DE INTERACCIÓN EN CANVAS (HOVER MOUSE Y TOQUE MÓVIL)
+      // =========================================================================
+      function distToSegment(px, py, x1, y1, x2, y2) {
+        const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+        if (l2 === 0) return Math.hypot(px - x1, py - y1);
+        let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+      }
+
+      function handlePointerInspect(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const px = clientX - rect.left;
+        const py = clientY - rect.top;
+
+        const nodes = canvas._hitNodes || [];
+        const edges = canvas._hitEdges || [];
+
+        // 1. Prioridad: hit-test en satélites
+        for (const item of nodes) {
+          if (Math.hypot(px - item.x, py - item.y) <= 22) {
+            state.hoveredItem = { type: 'node', data: item.sat };
+            canvasWrapper.style.cursor = 'pointer';
+            showTooltipAt(px, py, {
+              header: `${item.sat.word} · ${item.sat.domain}`,
+              body: item.sat.insight,
+              meta: `Afinidad con ${state.coreWord}: ${(item.sat.gravity * 100).toFixed(0)}%`
+            });
+            return;
+          }
+        }
+
+        // 2. Hit-test en líneas de energía entre satélites
+        for (const edge of edges) {
+          if (distToSegment(px, py, edge.x1, edge.y1, edge.x2, edge.y2) <= 10) {
+            state.hoveredItem = { type: 'edge', data: edge };
+            canvasWrapper.style.cursor = 'pointer';
+            const statusLabel = edge.dist >= 0.76
+              ? 'Alta Divergencia (Óptimo)'
+              : edge.dist >= 0.58
+                ? 'Separación Moderada'
+                : 'Fricción Semántica (Cercanos)';
+            showTooltipAt(px, py, {
+              header: `${edge.satA.word} ↔ ${edge.satB.word}`,
+              body: `Distancia Coseno: d = ${edge.dist.toFixed(2)}`,
+              meta: statusLabel
+            });
+            return;
+          }
+        }
+
+        state.hoveredItem = null;
+        canvasWrapper.style.cursor = 'crosshair';
+        tooltipEl.classList.add('hidden');
+      }
+
+      function showTooltipAt(px, py, { header, body, meta }) {
+        tooltipHeader.textContent = header;
+        tooltipBody.textContent = body;
+        tooltipMeta.textContent = meta;
+        tooltipEl.classList.remove('hidden');
+
+        // Posicionar dentro de los límites del canvas
+        const tipW = tooltipEl.offsetWidth || 220;
+        const tipH = tooltipEl.offsetHeight || 85;
+        let left = px + 14;
+        let top = py - tipH - 10;
+
+        if (left + tipW > canvasWidth - 12) left = px - tipW - 14;
+        if (left < 12) left = 12;
+        if (top < 54) top = py + 18;
+
+        tooltipEl.style.left = `${left}px`;
+        tooltipEl.style.top = `${top}px`;
+      }
+
+      canvasWrapper.addEventListener('mousemove', (e) => handlePointerInspect(e.clientX, e.clientY));
+      canvasWrapper.addEventListener('mouseleave', () => {
+        state.hoveredItem = null;
+        tooltipEl.classList.add('hidden');
+      });
+      canvasWrapper.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          handlePointerInspect(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      // =========================================================================
+      // 10. LÓGICA DE LANZAMIENTO DE PALABRAS Y CAMBIO DE NÚCLEO
+      // =========================================================================
+      async function handleLaunchWord(e) {
+        e.preventDefault();
+        if (state.isEvaluating || state.satellites.length >= 5) return;
+
+        const raw = wordInput.value.trim();
+        if (!raw) return;
+
+        const cleanWord = raw.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s-]/g, '').trim().toUpperCase();
+        if (cleanWord.length < 2) {
+          showRadarToast('Escribe una palabra válida de al menos 2 letras.', 'void');
+          return;
+        }
+
+        const normCand = normalizeWord(cleanWord);
+        if (normCand === normalizeWord(state.coreWord)) {
+          sound.playReject();
+          spawnRejectionAnimation(cleanWord, 'roche');
+          showRadarToast(`"${cleanWord}" es la misma Palabra Núcleo.`, 'roche');
+          wordInput.value = '';
+          return;
+        }
+
+        if (state.satellites.some(s => normalizeWord(s.word) === normCand)) {
+          showRadarToast(`"${cleanWord}" ya está en tu constelación.`, 'info');
+          wordInput.value = '';
+          return;
+        }
+
+        sound.ensureContext();
+        sound.playLaunch();
+        setEvaluatingUI(true);
+
+        const evaluation = await evaluateWordSemantic(state.coreWord, cleanWord, state.satellites);
+        setEvaluatingUI(false);
+        wordInput.value = '';
+
+        // Caso A: Límite de Roche (demasiado obvia o sinónima)
+        if (evaluation.isTooObvious) {
+          sound.playReject();
+          spawnRejectionAnimation(cleanWord, 'roche');
+          state.rejectedHistory.push({
+            word: cleanWord,
+            type: 'roche',
+            reason: evaluation.rejectReason
+          });
+          showRadarToast(`⚠️ Límite de Roche: ${evaluation.rejectReason}`, 'roche');
+          updateTelemetryUI();
+          return;
+        }
+
+        // Caso B: Vacío Exterior (sin relación semántica válida con el núcleo)
+        if (!evaluation.isValidCoreLink) {
+          sound.playReject();
+          spawnRejectionAnimation(cleanWord, 'void');
+          state.rejectedHistory.push({
+            word: cleanWord,
+            type: 'void',
+            reason: evaluation.rejectReason
+          });
+          showRadarToast(`🌌 Vacío Exterior: ${evaluation.rejectReason}`, 'void');
+          updateTelemetryUI();
+          return;
+        }
+
+        // Caso C: Satélite Aceptado en la Zona Orbital Estable
+        const slotIndex = state.satellites.length;
+        const color = SATELLITE_PALETTE[slotIndex % SATELLITE_PALETTE.length];
+        const targetRadius = mapGravityToOrbitRatio(evaluation.gravity);
+
+        // Elegir ángulo inicial opuesto al centro de masa de los satélites existentes
+        let initialAngle = (slotIndex * (Math.PI * 2)) / 5 - Math.PI / 2;
+        if (state.satellites.length > 0) {
+          let sumX = 0, sumY = 0;
+          state.satellites.forEach(s => {
+            sumX += Math.cos(s.angle);
+            sumY += Math.sin(s.angle);
+          });
+          initialAngle = Math.atan2(-sumY, -sumX) + (Math.random() - 0.5) * 0.35;
+        }
+
+        const newSat = {
+          id: `sat_${Date.now()}_${slotIndex}`,
+          word: cleanWord,
+          domain: evaluation.domain,
+          gravity: evaluation.gravity,
+          insight: evaluation.insight,
+          color,
+          angle: initialAngle,
+          angularVel: 0,
+          targetRadius,
+          currentRadius: 0.26, // Emerge desde el límite interior hacia su órbita
+          pulsePhase: 0,
+          vec: evaluation.vec || null
+        };
+
+        // Registrar distancias por pares con los satélites previos
+        let avgNewDist = 0.82;
+        if (state.satellites.length > 0) {
+          let sumD = 0;
+          state.satellites.forEach((prevSat, idx) => {
+            const d = evaluation.pairwiseDistances[idx] ?? 0.78;
+            state.distanceMatrix[getPairKey(prevSat.id, newSat.id)] = d;
+            sumD += d;
+          });
+          avgNewDist = sumD / state.satellites.length;
+        }
+
+        state.satellites.push(newSat);
+        sound.playOrbitSuccess(avgNewDist, slotIndex);
+
+        if (state.satellites.length < 5) {
+          const qualityMsg = avgNewDist >= 0.76
+            ? `✨ ¡Gran salto conceptual! (${cleanWord} · ${evaluation.domain})`
+            : avgNewDist < 0.58
+              ? `⚡ En órbita, pero cercana a un nodo previo (d=${avgNewDist.toFixed(2)})`
+              : `🛰️ ${cleanWord} entró en órbita (${evaluation.domain})`;
+          showRadarToast(qualityMsg, avgNewDist < 0.58 ? 'roche' : 'success');
+        } else {
+          const finalStats = computeTelemetryStats();
+          setTimeout(() => {
+            sound.playConstellationComplete(finalStats.redTensionCount > 0);
+          }, 260);
+          showRadarToast(`🪐 Constelación completa · Índice Divergente: ${finalStats.datScore.toFixed(1)}`, 'success');
+        }
+
+        updateTelemetryUI();
+      }
+
+      function selectCoreWord(newCore) {
+        if (!CORE_CONFIGS[newCore]) return;
+        state.coreWord = newCore;
+        state.satellites = [];
+        state.distanceMatrix = {};
+        state.rejectedHistory = [];
+        state.transientAnimations = [];
+        state.hoveredItem = null;
+        tooltipEl.classList.add('hidden');
+
+        // Actualizar estilos de botones del selector
+        document.querySelectorAll('.core-btn').forEach(btn => {
+          if (btn.dataset.core === newCore) {
+            btn.className = 'core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-sm';
+          } else {
+            btn.className = 'core-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold tracking-wide transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent';
+          }
+        });
+
+        const cfg = CORE_CONFIGS[newCore];
+        wordInput.value = '';
+        wordInput.placeholder = cfg.placeholder;
+        promptHint.textContent = cfg.hint;
+
+        updateTelemetryUI();
+        wordInput.focus();
+      }
+
+      // =========================================================================
+      // 11. EVENTOS DE CONTROLES Y PORTAPAPELES
+      // =========================================================================
+      launchForm.addEventListener('submit', handleLaunchWord);
+
+      document.getElementById('coreSelector').addEventListener('click', (e) => {
+        const btn = e.target.closest('.core-btn');
+        if (btn && btn.dataset.core) {
+          sound.ensureContext();
+          sound.playLaunch();
+          selectCoreWord(btn.dataset.core);
+        }
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        sound.ensureContext();
+        sound.playLaunch();
+        selectCoreWord(state.coreWord);
+        showRadarToast(`Órbita de ${state.coreWord} reiniciada.`, 'info');
+      });
+
+      nextCoreBtn.addEventListener('click', () => {
+        const keys = Object.keys(CORE_CONFIGS);
+        const nextIdx = (keys.indexOf(state.coreWord) + 1) % keys.length;
+        sound.ensureContext();
+        sound.playLaunch();
+        selectCoreWord(keys[nextIdx]);
+      });
+
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        const isOn = sound.toggle();
+        document.getElementById('soundIconOn').classList.toggle('hidden', !isOn);
+        document.getElementById('soundIconOff').classList.toggle('hidden', isOn);
+        document.getElementById('soundLabel').textContent = isOn ? 'Audio ON' : 'Audio OFF';
+        if (isOn) sound.playLaunch();
+      });
+
+      // Copiar resultado al portapapeles usando document.execCommand('copy') compatible con iFrames
+      copyResultBtn.addEventListener('click', () => {
+        const textToCopy = sharePreviewBox.textContent;
+        const tempArea = document.createElement('textarea');
+        tempArea.value = textToCopy;
+        tempArea.style.position = 'fixed';
+        tempArea.style.opacity = '0';
+        document.body.appendChild(tempArea);
+        tempArea.select();
+        try {
+          document.execCommand('copy');
+          copyBtnText.textContent = '¡Copiado!';
+          copyResultBtn.classList.replace('bg-cyan-500', 'bg-emerald-400');
+          setTimeout(() => {
+            copyBtnText.textContent = 'Copiar Resultado';
+            copyResultBtn.classList.replace('bg-emerald-400', 'bg-cyan-500');
+          }, 2200);
+        } catch (err) {
+          showRadarToast('Selecciona el recuadro superior para copiar manualmente.', 'info');
+        }
+        document.body.removeChild(tempArea);
+      });
+
+      // Modal "¿Cómo funciona?"
+      document.getElementById('helpBtn').addEventListener('click', () => {
+        helpModal.classList.remove('hidden');
+      });
+      document.getElementById('closeHelpBtn').addEventListener('click', () => {
+        helpModal.classList.add('hidden');
+      });
+      document.getElementById('startPlayingModalBtn').addEventListener('click', () => {
+        helpModal.classList.add('hidden');
+        wordInput.focus();
+      });
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) helpModal.classList.add('hidden');
+      });
+
+      // Inicialización en carga de ventana
+      window.addEventListener('load', () => {
+        resizeCanvas();
+        selectCoreWord('RELOJ');
+        requestAnimationFrame(renderCanvas);
+      });
+    })();
+  </script>
+</body>
+</html>

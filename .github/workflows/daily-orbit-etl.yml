@@ -1,0 +1,37 @@
+name: ÓRBITA — Validación Psicométrica y Build Estático
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install NumPy & run Offline ETL + Psychometric Suite
+        run: |
+          pip install numpy
+          python -m unittest discover -s pipeline/tests -v
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies & Build Static Export
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
