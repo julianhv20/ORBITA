@@ -1,8 +1,9 @@
-# Node / Next.js
+# Node / Next.js / Vercel
 node_modules/
 .next/
 out/
 dist/
+.vercel/
 *.tsbuildinfo
 next-env.d.ts
 
@@ -19,3 +20,6 @@ pipeline/cache/
 .env*.local
 .DS_Store
 Thumbs.db
+
+.vercel
+.env*
