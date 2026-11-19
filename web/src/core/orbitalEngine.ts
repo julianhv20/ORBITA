@@ -1,477 +1,345 @@
 import {
-  ActiveSatellite,
-  ConstellationTelemetry,
-  DailyPackMetadata,
-  LaunchEvaluation,
-  LoadedDailyPack,
-  PairEdgeMetric,
-  PercentileBands,
-  SatelliteColor,
+  DayData,
+  Edge,
+  GameContext,
+  LaunchOutcome,
+  Manifest,
+  Rank,
+  Satellite,
+  Scoring,
+  Telemetry,
+  Vocab,
+  ConnectionTier,
 } from './types';
 
-export const SATELLITE_PALETTE: SatelliteColor[] = [
-  { hex: '#E5A93C', glow: 'rgba(229, 169, 60, 0.42)', name: 'Ámbar Solar', symbol: '◈' },
-  { hex: '#2DD4BF', glow: 'rgba(45, 212, 191, 0.42)', name: 'Turquesa Espectral', symbol: '◇' },
-  { hex: '#A78BFA', glow: 'rgba(167, 139, 250, 0.42)', name: 'Violeta Nebular', symbol: '❖' },
-  { hex: '#38BDF8', glow: 'rgba(56, 189, 248, 0.42)', name: 'Cian Cenital', symbol: '✦' },
-  { hex: '#10B981', glow: 'rgba(16, 185, 129, 0.42)', name: 'Esmeralda Armónica', symbol: '✧' },
-];
+export const TARGET = 5;
+export const MAX_SWAPS = 3;
+
+export const SAT_COLORS = ['#E5A93C', '#2DD4BF', '#A78BFA', '#38BDF8', '#F472B6'];
+
+/* ---------------------------------------------------------------- texto */
 
 export function normalizeSpanishWord(raw: string): string {
   if (!raw) return '';
-  const preserved = raw.trim().toLowerCase().replace(/ñ/g, '\u0001');
-  const stripped = preserved.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return stripped.replace(/\u0001/g, 'ñ').replace(/[^a-zñ]/g, '');
+  const s = raw.trim().toLowerCase().replace(/ñ/g, '\u0001');
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u0001/g, 'ñ')
+    .replace(/[^a-zñ]/g, '');
 }
 
-export function spanishStem(normWord: string): string {
-  const w = normalizeSpanishWord(normWord);
+const SUFFIXES = [
+  'amientos', 'imientos', 'aciones', 'iciones', 'adoras', 'adores', 'amiento', 'imiento', 'mente',
+  'idades', 'anzas', 'acion', 'icion', 'adora', 'ador', 'erias', 'eros', 'eras', 'ismos', 'istas',
+  'ables', 'ibles', 'antes', 'ientes', 'illos', 'illas', 'itos', 'itas', 'otes', 'otas', 'azos',
+  'azas', 'eria', 'ero', 'era', 'ismo', 'ista', 'able', 'ible', 'idad', 'anza', 'ante', 'iente',
+  'illo', 'illa', 'ito', 'ita', 'ote', 'ota', 'azo', 'aza', 'oso', 'osa', 'osos', 'osas', 'ales',
+  'ando', 'iendo', 'ado', 'ada', 'ados', 'adas', 'ido', 'ida', 'idos', 'idas', 'ces', 'es', 's',
+  'a', 'o', 'e',
+];
+
+export function spanishStem(w: string): string {
   if (w.length <= 3) return w;
-  const suffixes = [
-    'amientos', 'imientos', 'aciones', 'iciones', 'adoras', 'adores',
-    'amiento', 'imiento', 'antemente', 'mente', 'idades', 'anzas',
-    'acion', 'icion', 'adora', 'ador', 'erias', 'eros', 'eras',
-    'ismos', 'istas', 'ables', 'ibles', 'antes', 'ientes', 'illos', 'illas',
-    'itos', 'itas', 'otes', 'otas', 'azos', 'azas', 'escos', 'escas',
-    'eria', 'ero', 'era', 'ismo', 'ista', 'able', 'ible', 'idad', 'anza',
-    'ante', 'iente', 'illo', 'illa', 'ito', 'ita', 'ote', 'ota', 'azo', 'aza',
-    'esco', 'esca', 'oso', 'osa', 'osos', 'osas', 'al', 'ales', 'ar', 'er', 'ir',
-    'ando', 'iendo', 'ado', 'ada', 'ados', 'adas', 'ido', 'ida', 'idos', 'idas',
-    'ces', 'es', 's', 'a', 'o', 'e',
-  ];
-  for (const suf of suffixes) {
+  for (const suf of SUFFIXES) {
     if (w.endsWith(suf) && w.length - suf.length >= 4) {
-      let stem = w.slice(0, -suf.length);
-      if (suf === 'ces') stem += 'z';
-      return stem;
+      const stem = w.slice(0, -suf.length);
+      return suf === 'ces' ? stem + 'z' : stem;
     }
   }
   return w;
 }
 
-export function isMorphologicalDerivative(coreWord: string, candidateWord: string): boolean {
-  const cNorm = normalizeSpanishWord(coreWord);
-  const wNorm = normalizeSpanishWord(candidateWord);
-  if (!cNorm || !wNorm) return false;
-  if (cNorm === wNorm) return true;
-
-  const cStem = spanishStem(cNorm);
-  const wStem = spanishStem(wNorm);
-  if (cStem.length >= 4 && cStem === wStem) return true;
-
-  const prefixLen = cNorm.length >= 5 ? 5 : cNorm.length;
-  if (prefixLen >= 4 && wNorm.startsWith(cNorm.slice(0, prefixLen))) {
-    if (wNorm.length <= cNorm.length + 6) return true;
-  }
-  return false;
+export function isMorphologicalDerivative(core: string, cand: string): boolean {
+  const c = normalizeSpanishWord(core);
+  const w = normalizeSpanishWord(cand);
+  if (!c || !w) return false;
+  if (c === w) return true;
+  const cs = spanishStem(c);
+  if (cs.length >= 4 && cs === spanishStem(w)) return true;
+  const p = c.length >= 5 ? 5 : c.length;
+  return p >= 4 && w.startsWith(c.slice(0, p)) && w.length <= c.length + 6;
 }
 
-export function decodeDailyPack(meta: DailyPackMetadata, buffer: ArrayBuffer): LoadedDailyPack {
-  const view = new DataView(buffer);
-  const magic =
-    String.fromCharCode(view.getUint8(0)) +
-    String.fromCharCode(view.getUint8(1)) +
-    String.fromCharCode(view.getUint8(2)) +
-    String.fromCharCode(view.getUint8(3));
+/* ---------------------------------------------------------------- carga */
 
-  if (magic !== 'ORBT') {
-    throw new Error(`Formato binario inválido: cabecera '${magic}' (se esperaba 'ORBT').`);
-  }
-
-  const version = view.getUint8(4);
-  if (version !== 1) {
-    throw new Error(`Versión binaria ORBT no soportada: v${version}`);
-  }
-
+export async function loadVocab(base: string, manifest: Manifest): Promise<Vocab> {
+  const [binRes, wordsRes] = await Promise.all([
+    fetch(`${base}/${manifest.vocab.bin}`),
+    fetch(`${base}/${manifest.vocab.words}`),
+  ]);
+  if (!binRes.ok || !wordsRes.ok) throw new Error('No se pudo cargar el vocabulario.');
+  const buf = await binRes.arrayBuffer();
+  const view = new DataView(buf);
+  const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+  if (magic !== 'ORBV') throw new Error('Vocabulario inválido.');
   const dim = view.getUint8(5);
-  const candidateCount = view.getUint16(6, true);
-  const tauMin = view.getFloat32(8, true);
-  const sMax = view.getFloat32(12, true);
-
-  const gaByteOffset = 16;
-  const gaFloatLength = candidateCount * 2;
-  const gravityAndAngles = new Float32Array(buffer, gaByteOffset, gaFloatLength);
-
-  const vecByteOffset = 16 + candidateCount * 8;
-  const vectorsInt8 = new Int8Array(buffer, vecByteOffset, candidateCount * dim);
-
-  const vectorNorms = new Float64Array(candidateCount);
-  for (let i = 0; i < candidateCount; i++) {
-    let sumSq = 0;
-    const base = i * dim;
-    for (let k = 0; k < dim; k++) {
-      const v = vectorsInt8[base + k];
-      sumSq += v * v;
-    }
-    vectorNorms[i] = Math.sqrt(Math.max(sumSq, 1e-9));
+  const count = view.getUint32(6, true);
+  const q = new Int8Array(buf, 10, count * dim);
+  const unit = new Float32Array(count * dim);
+  for (let i = 0; i < count; i++) {
+    let s = 0;
+    const o = i * dim;
+    for (let k = 0; k < dim; k++) s += q[o + k] * q[o + k];
+    const inv = 1 / Math.sqrt(Math.max(s, 1e-9));
+    for (let k = 0; k < dim; k++) unit[o + k] = q[o + k] * inv;
   }
-
-  const normToIndex = new Map<string, number>();
-  const fallbackNoEnyeToIndex = new Map<string, number>();
-
-  meta.candidates.forEach(([norm], idx) => {
-    normToIndex.set(norm, idx);
-    if (norm.includes('ñ')) {
-      fallbackNoEnyeToIndex.set(norm.replace(/ñ/g, 'n'), idx);
-    }
+  const words = (await wordsRes.text()).split(/\r?\n/);
+  const normToIdx = new Map<string, number>();
+  words.forEach((w, i) => {
+    const n = normalizeSpanishWord(w);
+    if (n && !normToIdx.has(n)) normToIdx.set(n, i);
   });
+  return { dim, count, words, unit, normToIdx };
+}
 
-  Object.entries(meta.formsMap).forEach(([inflected, idx]) => {
-    if (!normToIndex.has(inflected)) {
-      normToIndex.set(inflected, idx);
-      if (inflected.includes('ñ')) {
-        fallbackNoEnyeToIndex.set(inflected.replace(/ñ/g, 'n'), idx);
-      }
-    }
+export function buildContext(vocab: Vocab, day: DayData, scoring: Scoring): GameContext {
+  const core = vocab.unit.slice(day.coreIdx * vocab.dim, (day.coreIdx + 1) * vocab.dim);
+  const rocheIdx = new Set<number>();
+  day.roche.forEach((n) => {
+    const i = vocab.normToIdx.get(n);
+    if (i !== undefined) rocheIdx.add(i);
   });
-
-  const rocheSet = new Set<string>(meta.rocheWords);
-
   return {
-    meta,
-    dim,
-    candidateCount,
-    tauMin,
-    sMax,
-    gravityAndAngles,
-    vectorsInt8,
-    vectorNorms,
-    normToIndex,
-    fallbackNoEnyeToIndex,
-    rocheSet,
+    vocab,
+    day,
+    scoring,
+    core,
+    bridgeSet: new Set(day.bridges),
+    rocheSet: new Set(day.roche),
+    rocheIdx,
   };
 }
 
-/**
- * Producto punto exacto sobre vectores residuales Int8 cuantizados en < 0.005 ms.
- * Idéntico bit a bit con `tangential_distance_from_cos` en pipeline/src/orbital_math.py.
- */
-export function computeTangentialDistance(
-  pack: LoadedDailyPack,
-  idxA: number,
-  idxB: number
-): number {
-  if (idxA === idxB) return 0.08;
-  const dim = pack.dim;
-  const vecs = pack.vectorsInt8;
-  const baseA = idxA * dim;
-  const baseB = idxB * dim;
-
-  let dot = 0;
-  for (let k = 0; k < dim; k++) {
-    dot += vecs[baseA + k] * vecs[baseB + k];
-  }
-
-  const denom = pack.vectorNorms[idxA] * pack.vectorNorms[idxB];
-  const cosSim = Math.max(-1.0, Math.min(1.0, denom > 0 ? dot / denom : 0));
-
-  const posPart = Math.max(0.0, cosSim);
-  const negPart = Math.min(0.0, cosSim);
-  const dist = 0.85 - 0.75 * Math.pow(posPart, 0.8) + 0.45 * Math.pow(-negPart, 0.85);
-  return Math.max(0.08, Math.min(0.97, dist));
+/** Indice del dia (zona horaria fija del juego) */
+export function dayIndex(manifest: Manifest, now = new Date()): number {
+  const epoch = Date.parse(`${manifest.epochDate}T00:00:00Z`);
+  const shifted = now.getTime() + manifest.tzOffsetMinutes * 60000;
+  return Math.max(0, Math.floor((shifted - epoch) / 86400000));
 }
 
-export function mapGravityToOrbitRatio(gravity: number): number {
-  const clamped = Math.max(0.32, Math.min(0.84, gravity));
-  // Mayor gravedad -> órbita más cercana al núcleo (sin tocar Roche); menor gravedad -> órbita más lejana/profunda
-  const abstractness = 1 - (clamped - 0.32) / (0.84 - 0.32);
-  return 0.36 + abstractness * 0.43; // [0.36 .. 0.79] del radio máximo del astrolabio
+export function dayKey(manifest: Manifest, now = new Date()): string {
+  const shifted = new Date(now.getTime() + manifest.tzOffsetMinutes * 60000);
+  return shifted.toISOString().slice(0, 10);
 }
 
-export function evaluateCandidateLaunch(
-  rawInput: string,
-  pack: LoadedDailyPack,
-  lexiconSet: Set<string>,
-  activeSatellites: ActiveSatellite[]
-): LaunchEvaluation {
-  const displayRaw = rawInput.trim().toUpperCase();
-  const norm = normalizeSpanishWord(rawInput);
-  const coreNorm = normalizeSpanishWord(pack.meta.coreWord);
+/* ---------------------------------------------------------------- matematica */
 
-  if (norm.length < 2) {
-    return {
-      outcome: 'UNKNOWN_WORD',
-      consumesImpulse: false,
-      rawInput,
-      displayWord: displayRaw,
-      normWord: norm,
-      message: 'Introduce una palabra de al menos 2 letras.',
-    };
+function gravityOf(ctx: GameContext, idx: number): number {
+  const d = ctx.vocab.dim;
+  const o = idx * d;
+  let s = 0;
+  for (let k = 0; k < d; k++) s += ctx.vocab.unit[o + k] * ctx.core[k];
+  return s;
+}
+
+/** u = v - (v.v0) v0, normalizado (identico a pipeline/build_v2.py::tangent) */
+function tangentOf(ctx: GameContext, idx: number): Float64Array {
+  const d = ctx.vocab.dim;
+  const o = idx * d;
+  const g = gravityOf(ctx, idx);
+  const u = new Float64Array(d);
+  let n = 0;
+  for (let k = 0; k < d; k++) {
+    const x = ctx.vocab.unit[o + k] - g * ctx.core[k];
+    u[k] = x;
+    n += x * x;
   }
+  const inv = 1 / Math.sqrt(Math.max(n, 1e-12));
+  for (let k = 0; k < d; k++) u[k] *= inv;
+  return u;
+}
 
-  if (norm === coreNorm) {
-    return {
-      outcome: 'SELF_CORE',
-      consumesImpulse: false,
-      rawInput,
-      displayWord: pack.meta.coreWord,
-      normWord: norm,
-      message: `"${pack.meta.coreWord}" es el astro central. Lanza conceptos que orbiten a su alrededor.`,
-    };
+function angleOf(ctx: GameContext, u: Float64Array): number {
+  const [b1, b2] = ctx.day.basis;
+  let x = 0;
+  let y = 0;
+  for (let k = 0; k < u.length; k++) {
+    x += u[k] * b1[k];
+    y += u[k] * b2[k];
   }
+  return Math.atan2(y - ctx.day.center2[1], x - ctx.day.center2[0]);
+}
 
-  // Verificar si ya está en órbita (directamente o por lema canónico)
-  const resolvedIdx =
-    pack.normToIndex.get(norm) ?? pack.fallbackNoEnyeToIndex.get(norm);
+export function tierOf(ctx: GameContext, idx: number, g: number): ConnectionTier {
+  if (ctx.bridgeSet.has(idx)) return 'bridge';
+  return g >= ctx.day.tauNear ? 'near' : 'far';
+}
 
-  const duplicateSat = activeSatellites.find(
-    (s) => s.norm === norm || (resolvedIdx !== undefined && s.candidateIndex === resolvedIdx)
-  );
-  if (duplicateSat) {
-    return {
-      outcome: 'DUPLICATE',
-      consumesImpulse: false,
-      rawInput,
-      displayWord: duplicateSat.word,
-      normWord: norm,
-      message: `"${duplicateSat.word}" ya orbita en tu constelación actual.`,
-    };
+export function radiusOf(ctx: GameContext, tier: ConnectionTier, g: number): number {
+  const t = Math.max(0, Math.min(1, g / (ctx.day.tauNear + 0.22)));
+  const base = 0.8 - 0.4 * t;
+  return tier === 'bridge' ? Math.min(base, 0.62) : base;
+}
+
+export function resolveWord(input: string, vocab: Vocab): number | undefined {
+  const n = normalizeSpanishWord(input);
+  if (n.length < 2) return undefined;
+  const direct = vocab.normToIdx.get(n);
+  if (direct !== undefined) return direct;
+  const cands: string[] = [];
+  if (n.endsWith('ces')) cands.push(n.slice(0, -3) + 'z');
+  if (n.endsWith('es')) cands.push(n.slice(0, -2));
+  if (n.endsWith('s')) cands.push(n.slice(0, -1));
+  for (const c of cands) {
+    const i = vocab.normToIdx.get(c);
+    if (i !== undefined) return i;
   }
+  return undefined;
+}
 
-  // 1. Chequeo de Límite de Roche (Obviedad funcional o derivación morfológica)
-  if (pack.rocheSet.has(norm) || isMorphologicalDerivative(pack.meta.coreWord, norm)) {
-    return {
-      outcome: 'ROCHE_LIMIT',
-      consumesImpulse: true,
-      rawInput,
-      displayWord: displayRaw,
-      normWord: norm,
-      gravity: 0.94,
-      message: `Límite de Roche: "${displayRaw}" es derivada o demasiado obvia respecto a ${pack.meta.coreWord} y se incinera en el núcleo.`,
-    };
+export function evaluateLaunch(input: string, ctx: GameContext, sats: Satellite[]): LaunchOutcome {
+  const display = input.trim().toUpperCase();
+  const n = normalizeSpanishWord(input);
+  if (n.length < 2) return { kind: 'INVALID', word: display };
+  const coreNorm = normalizeSpanishWord(ctx.day.core);
+  if (n === coreNorm) return { kind: 'SELF', word: display };
+
+  const idx = resolveWord(input, ctx.vocab);
+  if (sats.some((s) => s.idx === idx || normalizeSpanishWord(s.word) === n)) {
+    return { kind: 'DUPLICATE', word: display };
   }
-
-  // 2. Candidato Orbital Válido en el Subespacio del Día
-  if (resolvedIdx !== undefined) {
-    const [candNorm, candDisplay, domain, insight] = pack.meta.candidates[resolvedIdx];
-    const gravity = pack.gravityAndAngles[resolvedIdx * 2];
-    const semanticAngle = pack.gravityAndAngles[resolvedIdx * 2 + 1];
-
-    return {
-      outcome: 'ORBIT_CAPTURE',
-      consumesImpulse: true,
-      rawInput,
-      displayWord: candDisplay,
-      normWord: candNorm,
-      candidateIndex: resolvedIdx,
-      domain,
-      insight,
-      gravity,
-      semanticAngle,
-      message: `${candDisplay} capturada en órbita · ${domain}`,
-    };
+  if (
+    ctx.rocheSet.has(n) ||
+    (idx !== undefined && ctx.rocheIdx.has(idx)) ||
+    isMorphologicalDerivative(ctx.day.core, n)
+  ) {
+    return { kind: 'ROCHE', word: display };
   }
+  if (idx === undefined) return { kind: 'UNKNOWN', word: display };
 
-  // 3. Validar si existe en el léxico general del español (incluyendo singularización simple)
-  const singularGuess = norm.endsWith('ces')
-    ? norm.slice(0, -3) + 'z'
-    : norm.endsWith('es') && norm.length > 4
-      ? norm.slice(0, -2)
-      : norm.endsWith('s') && norm.length > 3
-        ? norm.slice(0, -1)
-        : norm;
-
-  const existsInSpanish =
-    lexiconSet.size === 0 || lexiconSet.has(norm) || lexiconSet.has(singularGuess);
-
-  if (!existsInSpanish) {
-    return {
-      outcome: 'UNKNOWN_WORD',
-      consumesImpulse: false,
-      rawInput,
-      displayWord: displayRaw,
-      normWord: norm,
-      message: `"${displayRaw}" no figura en la carta léxica (0 impulsos consumidos).`,
-    };
-  }
-
-  // 4. Palabra real en español pero con afinidad g < tau_min -> Escapa al Vacío Exterior
-  // Estimación determinista de baja gravedad [0.07..0.26] para animar la desviación balística exacta
-  let h = 2166136261;
-  for (let i = 0; i < norm.length; i++) {
-    h ^= norm.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  const lowGravity = 0.08 + ((h >>> 0) % 19) * 0.01;
-
+  const g = gravityOf(ctx, idx);
+  const tier = tierOf(ctx, idx, g);
+  const u = tangentOf(ctx, idx);
   return {
-    outcome: 'OUTER_VOID',
-    consumesImpulse: true,
-    rawInput,
-    displayWord: displayRaw,
-    normWord: norm,
-    gravity: Number(lowGravity.toFixed(2)),
-    message: `Vacío Exterior: "${displayRaw}" carece de atracción suficiente con ${pack.meta.coreWord} (g=${lowGravity.toFixed(2)} < ${pack.tauMin.toFixed(2)}).`,
+    kind: 'CAPTURE',
+    sat: {
+      idx,
+      word: ctx.vocab.words[idx].toUpperCase(),
+      tier,
+      gravity: g,
+      angle: angleOf(ctx, u),
+      radius: radiusOf(ctx, tier, g),
+    },
   };
 }
 
-export function resolveDisplayAngles(satellites: ActiveSatellite[]): ActiveSatellite[] {
-  if (satellites.length <= 1) {
-    return satellites.map((s) => ({ ...s, displayAngle: s.semanticAngle }));
-  }
-
-  // Relajación elástica ligera para evitar solapamiento de etiquetas preservando el cuadrante semántico real
-  const angles = satellites.map((s) => s.semanticAngle);
-  const minSep = 0.34; // ~19.5 grados mínimos para legibilidad limpia de cápsulas
-
-  for (let iter = 0; iter < 18; iter++) {
-    for (let i = 0; i < angles.length; i++) {
-      for (let j = i + 1; j < angles.length; j++) {
-        let diff = angles[i] - angles[j];
+/** Separa angulos cercanos para que las etiquetas no se solapen, sin perder el cuadrante semantico. */
+export function relaxAngles(sats: Satellite[]): Satellite[] {
+  const n = sats.length;
+  if (n < 2) return sats;
+  const a = sats.map((s) => s.angle);
+  const minSep = 0.42;
+  for (let it = 0; it < 24; it++) {
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        let diff = a[i] - a[j];
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
-
-        const absDiff = Math.abs(diff);
-        if (absDiff < minSep) {
-          const push = (minSep - absDiff) * 0.45;
-          const sign = diff >= 0 ? 1 : -1;
-          angles[i] += sign * push;
-          angles[j] -= sign * push;
+        const ad = Math.abs(diff);
+        if (ad < minSep) {
+          const push = (minSep - ad) * 0.5;
+          const sg = diff >= 0 ? 1 : -1;
+          a[i] += sg * push;
+          a[j] -= sg * push;
         }
       }
-      // Ancla elástica hacia su ángulo semántico verdadero
-      let anchorDiff = satellites[i].semanticAngle - angles[i];
-      while (anchorDiff > Math.PI) anchorDiff -= Math.PI * 2;
-      while (anchorDiff < -Math.PI) anchorDiff += Math.PI * 2;
-      angles[i] += anchorDiff * 0.22;
     }
   }
-
-  return satellites.map((s, idx) => ({
-    ...s,
-    displayAngle: angles[idx],
-  }));
+  return sats.map((s, i) => ({ ...s, angle: a[i] }));
 }
 
-export function computeRankFromPercentiles(
-  score: number,
-  bands: PercentileBands
-): ConstellationTelemetry['rank'] {
-  if (score >= Math.max(89.5, bands.p99 - 1.2)) {
-    return {
-      title: 'Singularidad Creativa',
-      tier: 'supernova',
-      percentileLabel: 'Top 1% · Bisociación Excepcional',
-      badgeColor: '#E5A93C',
-    };
+/* ---------------------------------------------------------------- puntaje */
+
+export function anchorMap(raw: number, an: DayData['anchors']): number {
+  const pts: [number, number][] = [
+    [an.p01, 35],
+    [an.p10, 55],
+    [an.p50, 70],
+    [an.p90, 85],
+    [an.best, 97],
+  ];
+  if (raw <= pts[0][0]) {
+    const slope = (pts[1][1] - pts[0][1]) / Math.max(1e-6, pts[1][0] - pts[0][0]);
+    return Math.max(8, pts[0][1] - (pts[0][0] - raw) * slope);
   }
-  if (score >= Math.max(84.5, bands.p90 - 1.5)) {
-    return {
-      title: 'Arquitecto Astral',
-      tier: 'architect',
-      percentileLabel: 'Top 10% · Alta Divergencia',
-      badgeColor: '#10B981',
-    };
+  for (let i = 1; i < pts.length; i++) {
+    if (raw <= pts[i][0]) {
+      const [x0, y0] = pts[i - 1];
+      const [x1, y1] = pts[i];
+      return y0 + ((raw - x0) / Math.max(1e-6, x1 - x0)) * (y1 - y0);
+    }
   }
-  if (score >= Math.max(77.0, bands.p50)) {
-    return {
-      title: 'Navegante Bisociativo',
-      tier: 'navigator',
-      percentileLabel: 'Sobre el promedio humano',
-      badgeColor: '#2DD4BF',
-    };
-  }
-  if (score >= Math.max(66.0, bands.p25 - 4)) {
-    return {
-      title: 'Explorador Orbital',
-      tier: 'explorer',
-      percentileLabel: 'Órbita parcial · Dominios cercanos',
-      badgeColor: '#38BDF8',
-    };
-  }
-  return {
-    title: 'Órbita Lineal',
-    tier: 'linear',
-    percentileLabel: 'Alta colisión semántica',
-    badgeColor: '#FB7185',
-  };
+  return Math.min(100, 97 + (raw - an.best) * 30);
 }
 
-export function evaluateConstellation(
-  pack: LoadedDailyPack | null,
-  satellites: ActiveSatellite[]
-): ConstellationTelemetry {
-  const n = satellites.length;
-  const defaultBands: PercentileBands = pack?.meta.thresholds.percentiles ?? {
-    p25: 68,
-    p50: 78,
-    p75: 84,
-    p90: 88,
-    p99: 92,
+export function rankOf(score: number): Rank {
+  if (score >= 90) return { title: 'Singularidad', tier: 'supernova', color: '#E5A93C' };
+  if (score >= 80) return { title: 'Arquitecto', tier: 'architect', color: '#10B981' };
+  if (score >= 70) return { title: 'Navegante', tier: 'navigator', color: '#2DD4BF' };
+  if (score >= 58) return { title: 'Explorador', tier: 'explorer', color: '#38BDF8' };
+  return { title: 'Órbita lineal', tier: 'linear', color: '#FB7185' };
+}
+
+export function pairDistance(ctx: GameContext, a: Satellite, b: Satellite): number {
+  const ua = tangentOf(ctx, a.idx);
+  const ub = tangentOf(ctx, b.idx);
+  let dot = 0;
+  for (let k = 0; k < ua.length; k++) dot += ua[k] * ub[k];
+  return 1 - dot;
+}
+
+export function evaluateConstellation(ctx: GameContext | null, sats: Satellite[]): Telemetry {
+  const empty: Telemetry = {
+    count: sats.length,
+    score: 0,
+    divergence: 0,
+    connection: 0,
+    frictionCount: 0,
+    closest: null,
+    edges: [],
+    rank: rankOf(0),
+    isResonant: false,
   };
+  if (!ctx || sats.length < 2) return empty;
 
-  if (!pack || n < 2) {
-    return {
-      satelliteCount: n,
-      pairCount: 0,
-      score: 0,
-      meanDistance: 0,
-      minDistance: 0,
-      redFrictionCount: 0,
-      isHarmonicResonance: false,
-      edges: [],
-      closestPair: null,
-      farthestPair: null,
-      rank: computeRankFromPercentiles(0, defaultBands),
-    };
-  }
-
-  const edges: PairEdgeMetric[] = [];
+  const [fr, re] = ctx.day.edge;
+  const edges: Edge[] = [];
   let sum = 0;
-  let minDist = 2;
-  let maxDist = -1;
-  let closestPair: PairEdgeMetric | null = null;
-  let farthestPair: PairEdgeMetric | null = null;
-  let redFrictionCount = 0;
-
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      const a = satellites[i];
-      const b = satellites[j];
-      const d = computeTangentialDistance(pack, a.candidateIndex, b.candidateIndex);
-      const status: PairEdgeMetric['status'] =
-        d >= 0.76 ? 'resonance' : d >= 0.58 ? 'stable' : 'friction';
-
-      if (status === 'friction') redFrictionCount++;
-
-      const edge: PairEdgeMetric = {
-        uidA: a.uid,
-        uidB: b.uid,
-        wordA: a.word,
-        wordB: b.word,
-        distance: Number(d.toFixed(3)),
-        status,
-      };
-      edges.push(edge);
+  let min = 9;
+  let closest: Edge | null = null;
+  for (let i = 0; i < sats.length; i++) {
+    for (let j = i + 1; j < sats.length; j++) {
+      const d = pairDistance(ctx, sats[i], sats[j]);
+      const status: Edge['status'] = d <= fr ? 'friction' : d >= re ? 'resonance' : 'stable';
+      const e: Edge = { a: sats[i].uid, b: sats[j].uid, wordA: sats[i].word, wordB: sats[j].word, d, status };
+      edges.push(e);
       sum += d;
-
-      if (d < minDist) {
-        minDist = d;
-        closestPair = edge;
-      }
-      if (d > maxDist) {
-        maxDist = d;
-        farthestPair = edge;
+      if (d < min) {
+        min = d;
+        closest = e;
       }
     }
   }
-
-  const meanDistance = sum / edges.length;
-  const rawScore = (0.78 * meanDistance + 0.22 * minDist) * 100;
-  const score = Number(rawScore.toFixed(1));
-  const isHarmonicResonance = n === 5 && redFrictionCount === 0 && minDist >= 0.75;
-
+  const raw = ctx.scoring.wMean * (sum / edges.length) + ctx.scoring.wMin * min;
+  const divergence = anchorMap(raw, ctx.day.anchors);
+  const norm = ctx.day.hasBridges ? 1 : ctx.scoring.conn.near; // dias sin puentes: lo "cercano" ya es el maximo
+  const connection = Math.min(1, sats.reduce((a, s) => a + ctx.scoring.conn[s.tier], 0) / sats.length / norm);
+  const score = Math.min(100, ctx.scoring.wDiv * divergence + ctx.scoring.wConn * connection);
+  const frictionCount = edges.filter((e) => e.status === 'friction').length;
   return {
-    satelliteCount: n,
-    pairCount: edges.length,
-    score,
-    meanDistance: Number(meanDistance.toFixed(4)),
-    minDistance: Number(minDist.toFixed(4)),
-    redFrictionCount,
-    isHarmonicResonance,
+    count: sats.length,
+    score: Number(score.toFixed(1)),
+    divergence: Number(divergence.toFixed(1)),
+    connection: Number(connection.toFixed(2)),
+    frictionCount,
+    closest,
     edges,
-    closestPair,
-    farthestPair,
-    rank: computeRankFromPercentiles(score, defaultBands),
+    rank: rankOf(score),
+    isResonant: sats.length === TARGET && frictionCount === 0 && edges.every((e) => e.status !== 'stable' || e.d > (fr + re) / 2),
   };
+}
+
+export function masterConstellation(ctx: GameContext) {
+  return ctx.day.master.map((i) => ctx.vocab.words[i].toUpperCase());
 }

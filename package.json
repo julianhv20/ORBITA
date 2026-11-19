@@ -5,9 +5,8 @@
     "web"
   ],
   "scripts": {
-    "etl": "python pipeline/build_season.py",
-    "test:etl": "python -m unittest discover -s pipeline/tests -v",
-    "test:parity": "node pipeline/tests/verify_js_parity.mjs",
+    "etl": "python pipeline/build_v2.py",
+    "test:sim": "node pipeline/tests/build_engine.mjs && node pipeline/tests/sim_v2.mjs",
     "dev": "npm run dev -w web",
     "build": "npm run build -w web",
     "typecheck": "npm run typecheck -w web"

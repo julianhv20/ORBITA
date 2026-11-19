@@ -1,179 +1,147 @@
-export interface PuzzleManifestEntry {
+export interface ManifestPuzzle {
   id: string;
-  slug: string;
-  coreWord: string;
-  subtitle: string;
-  accent: string;
-  jsonFile: string;
-  binFile: string;
-  candidateCount: number;
-  sMax: number;
-  percentiles: PercentileBands;
-  binBytes: number;
-  jsonBytes: number;
+  core: string;
+  file: string;
+  hasBridges: boolean;
 }
 
-export interface SeasonManifest {
-  season: number;
+export interface Scoring {
+  wMean: number;
+  wMin: number;
+  wDiv: number;
+  wConn: number;
+  conn: Record<ConnectionTier, number>;
+}
+
+export interface Manifest {
+  v: number;
   epochDate: string;
-  lexiconFile: string;
-  lexiconCount: number;
-  puzzles: PuzzleManifestEntry[];
+  tzOffsetMinutes: number;
+  scoring: Scoring;
+  vocab: { bin: string; words: string; dim: number; count: number };
+  puzzles: ManifestPuzzle[];
 }
 
-export interface PercentileBands {
-  p25: number;
+export interface Anchors {
+  p01: number;
+  p10: number;
   p50: number;
-  p75: number;
   p90: number;
-  p99: number;
+  best: number;
 }
 
-export interface MasterSatellite {
-  word: string;
-  domain: string;
-  insight: string;
-  gravity: number;
-  angleRad: number;
-}
-
-export interface DailyPackMetadata {
-  version: number;
+export interface DayData {
+  v: number;
   id: string;
-  slug: string;
-  binFile: string;
-  coreWord: string;
-  subtitle: string;
-  hint: string;
+  core: string;
+  coreIdx: number;
   accent: string;
-  thresholds: {
-    tauMin: number;
-    tauRoche: number;
-    sMax: number;
-    percentiles: PercentileBands;
-  };
-  rocheWords: string[];
-  /** [norm, display, domain, insight] */
-  candidates: [string, string, string, string][];
-  formsMap: Record<string, number>;
-  masterConstellation: {
-    score: number;
-    meanDist: number;
-    minDist: number;
-    satellites: MasterSatellite[];
-  };
+  tauNear: number;
+  roche: string[];
+  bridges: number[];
+  hasBridges: boolean;
+  anchors: Anchors;
+  master: number[];
+  basis: number[][];
+  center2: number[];
+  edge: [number, number];
 }
 
-export interface LoadedDailyPack {
-  meta: DailyPackMetadata;
+export interface Vocab {
   dim: number;
-  candidateCount: number;
-  tauMin: number;
-  sMax: number;
-  /** Interleaved [gravity_i, angleRad_i] of length 2 * M */
-  gravityAndAngles: Float32Array;
-  /** Row-major Int8Array of length M * dim */
-  vectorsInt8: Int8Array;
-  /** Precomputed L2 norms of each Int8 row */
-  vectorNorms: Float64Array;
-  normToIndex: Map<string, number>;
-  fallbackNoEnyeToIndex: Map<string, number>;
+  count: number;
+  words: string[];
+  /** vectores unitarios (count * dim) */
+  unit: Float32Array;
+  normToIdx: Map<string, number>;
+}
+
+export interface GameContext {
+  vocab: Vocab;
+  day: DayData;
+  scoring: Scoring;
+  core: Float32Array;
+  bridgeSet: Set<number>;
   rocheSet: Set<string>;
+  rocheIdx: Set<number>;
 }
 
-export interface SatelliteColor {
-  hex: string;
-  glow: string;
-  name: string;
-  symbol: string;
-}
+export type ConnectionTier = 'bridge' | 'near' | 'far';
 
-export interface ActiveSatellite {
+export interface Satellite {
   uid: string;
-  candidateIndex: number;
+  idx: number;
   word: string;
-  norm: string;
-  domain: string;
-  insight: string;
+  tier: ConnectionTier;
   gravity: number;
-  semanticAngle: number;
-  displayAngle: number;
-  orbitRadiusRatio: number;
-  color: SatelliteColor;
-  launchedAt: number;
+  angle: number;
+  radius: number;
+  color: string;
+  addedAt: number;
 }
 
-export interface PairEdgeMetric {
-  uidA: string;
-  uidB: string;
+export type LaunchOutcome =
+  | { kind: 'CAPTURE'; sat: Omit<Satellite, 'uid' | 'addedAt' | 'color'> }
+  | { kind: 'ROCHE'; word: string }
+  | { kind: 'UNKNOWN'; word: string }
+  | { kind: 'DUPLICATE'; word: string }
+  | { kind: 'SELF'; word: string }
+  | { kind: 'INVALID'; word: string };
+
+export interface Edge {
+  a: string;
+  b: string;
   wordA: string;
   wordB: string;
-  distance: number;
-  status: 'resonance' | 'stable' | 'friction';
+  d: number;
+  status: 'friction' | 'stable' | 'resonance';
 }
 
-export interface ConstellationTelemetry {
-  satelliteCount: number;
-  pairCount: number;
+export interface Rank {
+  title: string;
+  tier: 'supernova' | 'architect' | 'navigator' | 'explorer' | 'linear';
+  color: string;
+}
+
+export interface Telemetry {
+  count: number;
   score: number;
-  meanDistance: number;
-  minDistance: number;
-  redFrictionCount: number;
-  isHarmonicResonance: boolean;
-  edges: PairEdgeMetric[];
-  closestPair: PairEdgeMetric | null;
-  farthestPair: PairEdgeMetric | null;
-  rank: {
-    title: string;
-    tier: 'supernova' | 'architect' | 'navigator' | 'explorer' | 'linear';
-    percentileLabel: string;
-    badgeColor: string;
-  };
+  divergence: number;
+  connection: number;
+  frictionCount: number;
+  closest: Edge | null;
+  edges: Edge[];
+  rank: Rank;
+  isResonant: boolean;
 }
 
-export type LaunchOutcomeType =
-  | 'ORBIT_CAPTURE'
-  | 'ROCHE_LIMIT'
-  | 'OUTER_VOID'
-  | 'UNKNOWN_WORD'
-  | 'DUPLICATE'
-  | 'SELF_CORE';
-
-export interface LaunchEvaluation {
-  outcome: LaunchOutcomeType;
-  consumesImpulse: boolean;
-  rawInput: string;
-  displayWord: string;
-  normWord: string;
-  candidateIndex?: number;
-  domain?: string;
-  insight?: string;
-  gravity?: number;
-  semanticAngle?: number;
-  message: string;
+export interface HistoryEntry {
+  dayKey: string; // YYYY-MM-DD
+  puzzleId: string;
+  core: string;
+  score: number;
+  tier: Rank['tier'];
+  words: string[];
 }
 
-export interface ImpulseLogEntry {
-  step: number;
-  word: string;
-  outcome: 'ORBIT_CAPTURE' | 'ROCHE_LIMIT' | 'OUTER_VOID' | 'EJECTED';
-  detail: string;
-  gravity?: number;
+export interface DayProgress {
+  dayKey: string;
+  puzzleId: string;
+  satellites: Satellite[];
+  swapsLeft: number;
+  misses: number;
+  sealed: boolean;
 }
 
-export interface PlayerStats {
-  gamesPlayed: number;
-  currentStreak: number;
-  maxStreak: number;
-  lastCompletedPuzzleId: string | null;
-  lastCompletedDate: string | null;
-  bestScore: number;
-  averageScore: number;
-  tierCounts: {
-    supernova: number;
-    architect: number;
-    navigator: number;
-    explorer: number;
-    linear: number;
-  };
+export interface LeaderboardRow {
+  name: string;
+  score: number;
+  tier?: string;
+}
+
+export interface LeaderboardData {
+  available: boolean;
+  total: number;
+  top: LeaderboardRow[];
+  me?: { rank: number; score: number } | null;
 }

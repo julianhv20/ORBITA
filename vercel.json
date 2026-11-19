@@ -4,23 +4,23 @@
   "buildCommand": "npm run build",
   "outputDirectory": "web/out",
   "installCommand": "npm install",
+  "functions": {
+    "api/leaderboard.js": {
+      "includeFiles": "web/public/v2/**",
+      "maxDuration": 10
+    }
+  },
   "headers": [
     {
-      "source": "/daily/(.*)\\.bin",
+      "source": "/v2/(vocab\\.bin|vocab_words\\.txt)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
       ]
     },
     {
-      "source": "/daily/lexicon_es.txt",
+      "source": "/v2/(day_.*\\.json|manifest\\.json)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=604800, stale-while-revalidate=86400"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=3600" }
       ]
     }
   ]

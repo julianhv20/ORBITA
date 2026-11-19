@@ -1,0 +1,384 @@
+{
+ "v": 2,
+ "epochDate": "2026-11-18",
+ "tzOffsetMinutes": -300,
+ "scoring": {
+  "wMean": 0.9,
+  "wMin": 0.1,
+  "wDiv": 0.7,
+  "wConn": 30,
+  "conn": {
+   "bridge": 1.0,
+   "near": 0.7,
+   "far": 0.25
+  }
+ },
+ "vocab": {
+  "bin": "vocab.bin",
+  "words": "vocab_words.txt",
+  "dim": 64,
+  "count": 24311
+ },
+ "puzzles": [
+  {
+   "id": "001",
+   "core": "HIELO",
+   "file": "day_001.json",
+   "hasBridges": true
+  },
+  {
+   "id": "002",
+   "core": "ISLA",
+   "file": "day_002.json",
+   "hasBridges": true
+  },
+  {
+   "id": "003",
+   "core": "TREN",
+   "file": "day_003.json",
+   "hasBridges": false
+  },
+  {
+   "id": "004",
+   "core": "RELOJ",
+   "file": "day_004.json",
+   "hasBridges": true
+  },
+  {
+   "id": "005",
+   "core": "FÁBRICA",
+   "file": "day_005.json",
+   "hasBridges": false
+  },
+  {
+   "id": "006",
+   "core": "VELA",
+   "file": "day_006.json",
+   "hasBridges": false
+  },
+  {
+   "id": "007",
+   "core": "SAL",
+   "file": "day_007.json",
+   "hasBridges": true
+  },
+  {
+   "id": "008",
+   "core": "CIRCO",
+   "file": "day_008.json",
+   "hasBridges": false
+  },
+  {
+   "id": "009",
+   "core": "LUNA",
+   "file": "day_009.json",
+   "hasBridges": true
+  },
+  {
+   "id": "010",
+   "core": "TEATRO",
+   "file": "day_010.json",
+   "hasBridges": false
+  },
+  {
+   "id": "011",
+   "core": "MONEDA",
+   "file": "day_011.json",
+   "hasBridges": false
+  },
+  {
+   "id": "012",
+   "core": "MUSEO",
+   "file": "day_012.json",
+   "hasBridges": false
+  },
+  {
+   "id": "013",
+   "core": "SOMBRA",
+   "file": "day_013.json",
+   "hasBridges": true
+  },
+  {
+   "id": "014",
+   "core": "SERPIENTE",
+   "file": "day_014.json",
+   "hasBridges": false
+  },
+  {
+   "id": "015",
+   "core": "MIEL",
+   "file": "day_015.json",
+   "hasBridges": false
+  },
+  {
+   "id": "016",
+   "core": "LABERINTO",
+   "file": "day_016.json",
+   "hasBridges": true
+  },
+  {
+   "id": "017",
+   "core": "VINO",
+   "file": "day_017.json",
+   "hasBridges": false
+  },
+  {
+   "id": "018",
+   "core": "SEMILLA",
+   "file": "day_018.json",
+   "hasBridges": true
+  },
+  {
+   "id": "019",
+   "core": "CAMINO",
+   "file": "day_019.json",
+   "hasBridges": false
+  },
+  {
+   "id": "020",
+   "core": "CUEVA",
+   "file": "day_020.json",
+   "hasBridges": false
+  },
+  {
+   "id": "021",
+   "core": "BANDERA",
+   "file": "day_021.json",
+   "hasBridges": false
+  },
+  {
+   "id": "022",
+   "core": "PIEDRA",
+   "file": "day_022.json",
+   "hasBridges": false
+  },
+  {
+   "id": "023",
+   "core": "BARCO",
+   "file": "day_023.json",
+   "hasBridges": false
+  },
+  {
+   "id": "024",
+   "core": "FUEGO",
+   "file": "day_024.json",
+   "hasBridges": true
+  },
+  {
+   "id": "025",
+   "core": "COMETA",
+   "file": "day_025.json",
+   "hasBridges": false
+  },
+  {
+   "id": "026",
+   "core": "ECO",
+   "file": "day_026.json",
+   "hasBridges": true
+  },
+  {
+   "id": "027",
+   "core": "JARDÍN",
+   "file": "day_027.json",
+   "hasBridges": false
+  },
+  {
+   "id": "028",
+   "core": "LLAVE",
+   "file": "day_028.json",
+   "hasBridges": true
+  },
+  {
+   "id": "029",
+   "core": "BIBLIOTECA",
+   "file": "day_029.json",
+   "hasBridges": false
+  },
+  {
+   "id": "030",
+   "core": "BOSQUE",
+   "file": "day_030.json",
+   "hasBridges": false
+  },
+  {
+   "id": "031",
+   "core": "ESPADA",
+   "file": "day_031.json",
+   "hasBridges": false
+  },
+  {
+   "id": "032",
+   "core": "PUENTE",
+   "file": "day_032.json",
+   "hasBridges": true
+  },
+  {
+   "id": "033",
+   "core": "COCINA",
+   "file": "day_033.json",
+   "hasBridges": false
+  },
+  {
+   "id": "034",
+   "core": "ACEITE",
+   "file": "day_034.json",
+   "hasBridges": false
+  },
+  {
+   "id": "035",
+   "core": "VIENTO",
+   "file": "day_035.json",
+   "hasBridges": true
+  },
+  {
+   "id": "036",
+   "core": "CRISTAL",
+   "file": "day_036.json",
+   "hasBridges": false
+  },
+  {
+   "id": "037",
+   "core": "BRÚJULA",
+   "file": "day_037.json",
+   "hasBridges": false
+  },
+  {
+   "id": "038",
+   "core": "CASTILLO",
+   "file": "day_038.json",
+   "hasBridges": true
+  },
+  {
+   "id": "039",
+   "core": "MÁSCARA",
+   "file": "day_039.json",
+   "hasBridges": true
+  },
+  {
+   "id": "040",
+   "core": "MONTAÑA",
+   "file": "day_040.json",
+   "hasBridges": false
+  },
+  {
+   "id": "041",
+   "core": "ESTRELLA",
+   "file": "day_041.json",
+   "hasBridges": false
+  },
+  {
+   "id": "042",
+   "core": "NIDO",
+   "file": "day_042.json",
+   "hasBridges": false
+  },
+  {
+   "id": "043",
+   "core": "MEMORIA",
+   "file": "day_043.json",
+   "hasBridges": true
+  },
+  {
+   "id": "044",
+   "core": "OCÉANO",
+   "file": "day_044.json",
+   "hasBridges": true
+  },
+  {
+   "id": "045",
+   "core": "TAMBOR",
+   "file": "day_045.json",
+   "hasBridges": false
+  },
+  {
+   "id": "046",
+   "core": "NUBE",
+   "file": "day_046.json",
+   "hasBridges": false
+  },
+  {
+   "id": "047",
+   "core": "MAPA",
+   "file": "day_047.json",
+   "hasBridges": true
+  },
+  {
+   "id": "048",
+   "core": "VOLCÁN",
+   "file": "day_048.json",
+   "hasBridges": false
+  },
+  {
+   "id": "049",
+   "core": "CUERDA",
+   "file": "day_049.json",
+   "hasBridges": false
+  },
+  {
+   "id": "050",
+   "core": "RÍO",
+   "file": "day_050.json",
+   "hasBridges": false
+  },
+  {
+   "id": "051",
+   "core": "TRUENO",
+   "file": "day_051.json",
+   "hasBridges": false
+  },
+  {
+   "id": "052",
+   "core": "SELVA",
+   "file": "day_052.json",
+   "hasBridges": false
+  },
+  {
+   "id": "053",
+   "core": "RAÍZ",
+   "file": "day_053.json",
+   "hasBridges": true
+  },
+  {
+   "id": "054",
+   "core": "VENTANA",
+   "file": "day_054.json",
+   "hasBridges": false
+  },
+  {
+   "id": "055",
+   "core": "ESPEJO",
+   "file": "day_055.json",
+   "hasBridges": true
+  },
+  {
+   "id": "056",
+   "core": "PAN",
+   "file": "day_056.json",
+   "hasBridges": false
+  },
+  {
+   "id": "057",
+   "core": "CADENA",
+   "file": "day_057.json",
+   "hasBridges": false
+  },
+  {
+   "id": "058",
+   "core": "ESCALERA",
+   "file": "day_058.json",
+   "hasBridges": true
+  },
+  {
+   "id": "059",
+   "core": "TORRE",
+   "file": "day_059.json",
+   "hasBridges": false
+  },
+  {
+   "id": "060",
+   "core": "PAPEL",
+   "file": "day_060.json",
+   "hasBridges": true
+  }
+ ]
+}

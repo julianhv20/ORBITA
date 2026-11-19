@@ -1,245 +1,112 @@
-import {
-  ActiveSatellite,
-  ConstellationTelemetry,
-  ImpulseLogEntry,
-  LoadedDailyPack,
-} from '../core/types';
-import { MAX_IMPULSES } from '../store/useOrbitaStore';
+import { Satellite, Telemetry } from '../core/types';
 
-export function buildSpoilerFreeShareText(
-  pack: LoadedDailyPack,
-  satellites: ActiveSatellite[],
-  telemetry: ConstellationTelemetry,
-  impulseLog: ImpulseLogEntry[],
-  mode: 'daily' | 'lab'
-): string {
-  const header =
-    mode === 'daily'
-      ? `🪐 ÓRBITA #${pack.meta.id} · ${pack.meta.coreWord}`
-      : `🪐 ÓRBITA [Lab] · ${pack.meta.coreWord}`;
+const TIER_GLYPH = { bridge: '✦', near: '◈', far: '○' } as const;
 
-  const impulseIcons = Array.from({ length: MAX_IMPULSES }, (_, i) => {
-    const entry = impulseLog[i];
-    if (!entry) return '·';
-    if (entry.outcome === 'ORBIT_CAPTURE') return '◈';
-    if (entry.outcome === 'ROCHE_LIMIT') return '🔥';
-    if (entry.outcome === 'OUTER_VOID') return '🌌';
-    return '↺';
-  }).join(' ');
-
-  const collisionLine =
-    telemetry.isHarmonicResonance
-      ? '✨ Resonancia Armónica (0 colisiones)'
-      : telemetry.redFrictionCount === 0
-        ? `${satellites.length}/5 satélites · Sin colisiones`
-        : `${satellites.length}/5 satélites · ${telemetry.redFrictionCount} ${telemetry.redFrictionCount === 1 ? 'fricción' : 'fricciones'}`;
-
+export function buildShareText(core: string, dayNumber: number, sats: Satellite[], tel: Telemetry, practice: boolean): string {
+  const glyphs = sats.map((s) => TIER_GLYPH[s.tier]).join(' ');
   return [
-    header,
-    `Índice Divergente: ${telemetry.score.toFixed(1)} / 100`,
-    `Rango: ${telemetry.rank.title}`,
-    `${impulseIcons}`,
-    collisionLine,
+    `🪐 ÓRBITA ${practice ? '· práctica' : `#${dayNumber}`} · ${core}`,
+    `${tel.score.toFixed(1)} / 100 · ${tel.rank.title}`,
+    glyphs,
+    tel.frictionCount === 0 ? 'Sin colisiones' : `${tel.frictionCount} ${tel.frictionCount === 1 ? 'colisión' : 'colisiones'}`,
   ].join('\n');
 }
 
-/**
- * Renderiza una Carta Astral vertical de alta resolución (1080×1350) sin revelar
- * las palabras de los satélites (solo su geometría semántica exacta, órbitas y enlaces).
- */
-export async function renderAstralCardBlob(
-  pack: LoadedDailyPack,
-  satellites: ActiveSatellite[],
-  telemetry: ConstellationTelemetry,
-  impulseLog: ImpulseLogEntry[]
+/** Carta cuadrada sin spoilers: solo geometria, colores y puntaje. */
+export async function renderCard(
+  core: string,
+  dayNumber: number,
+  accent: string,
+  sats: Satellite[],
+  tel: Telemetry
 ): Promise<Blob | null> {
   if (typeof document === 'undefined') return null;
-
   const W = 1080;
   const H = 1350;
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
+  const cv = document.createElement('canvas');
+  cv.width = W;
+  cv.height = H;
+  const c = cv.getContext('2d');
+  if (!c) return null;
 
-  const accent = pack.meta.accent || '#E5A93C';
-
-  // 1. Fondo Obsidiana Profunda + Nebulosa Radial
-  ctx.fillStyle = '#040508';
-  ctx.fillRect(0, 0, W, H);
-
+  c.fillStyle = '#040508';
+  c.fillRect(0, 0, W, H);
   const cx = W / 2;
-  const cy = 640;
-  const maxR = 370;
-  const rocheR = maxR * 0.25;
-  const outerR = maxR * 0.9;
+  const cy = 600;
+  const R = 380;
+  const g = c.createRadialGradient(cx, cy, 20, cx, cy, R * 1.3);
+  g.addColorStop(0, `${accent}2e`);
+  g.addColorStop(1, 'rgba(4,5,8,0)');
+  c.fillStyle = g;
+  c.fillRect(0, 0, W, H);
 
-  const neb = ctx.createRadialGradient(cx, cy, 40, cx, cy, outerR * 1.25);
-  neb.addColorStop(0, `${accent}26`);
-  neb.addColorStop(0.5, 'rgba(16, 185, 129, 0.08)');
-  neb.addColorStop(1, 'rgba(4, 5, 8, 0)');
-  ctx.fillStyle = neb;
-  ctx.fillRect(0, 0, W, H);
+  c.textAlign = 'center';
+  c.fillStyle = '#E5A93C';
+  c.font = '600 24px monospace';
+  c.fillText(`ÓRBITA  ·  DÍA ${dayNumber}`, cx, 120);
+  c.fillStyle = '#FAF8F5';
+  c.font = '64px Georgia, serif';
+  c.fillText(core, cx, 200);
 
-  // Marco doble de latón grabado
-  ctx.strokeStyle = 'rgba(229, 169, 60, 0.28)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(42, 42, W - 84, H - 84);
-  ctx.strokeStyle = 'rgba(244, 240, 234, 0.08)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(54, 54, W - 108, H - 108);
-
-  // 2. Cabecera Editorial
-  ctx.fillStyle = '#E5A93C';
-  ctx.font = '600 22px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(`ÓRBITA #${pack.meta.id}  ·  CARTA ASTRAL SIN SPOILERS`, cx, 118);
-
-  ctx.fillStyle = '#FAF8F5';
-  ctx.font = '700 68px Georgia, serif';
-  ctx.fillText(pack.meta.coreWord, cx, 198);
-
-  ctx.fillStyle = 'rgba(226, 221, 213, 0.65)';
-  ctx.font = '400 23px sans-serif';
-  ctx.fillText(pack.meta.subtitle, cx, 244);
-
-  // 3. Anillos del Astrolabio
-  ctx.strokeStyle = 'rgba(229, 169, 60, 0.28)';
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  ctx.stroke();
-
-  for (let deg = 0; deg < 360; deg += 5) {
-    const rad = (deg * Math.PI) / 180;
-    const len = deg % 30 === 0 ? 14 : 6;
-    ctx.strokeStyle = deg % 30 === 0 ? 'rgba(229, 169, 60, 0.5)' : 'rgba(244, 240, 234, 0.12)';
-    ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(rad) * (outerR - len), cy + Math.sin(rad) * (outerR - len));
-    ctx.lineTo(cx + Math.cos(rad) * outerR, cy + Math.sin(rad) * outerR);
-    ctx.stroke();
-  }
-
-  [0.45, 0.65, 0.8].forEach((r) => {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(244, 240, 234, 0.1)';
-    ctx.setLineDash([4, 10]);
-    ctx.beginPath();
-    ctx.arc(cx, cy, maxR * r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
+  [0.5, 0.8].forEach((r) => {
+    c.strokeStyle = 'rgba(244,240,234,0.12)';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.arc(cx, cy, R * r, 0, Math.PI * 2);
+    c.stroke();
   });
 
-  ctx.save();
-  ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)';
-  ctx.setLineDash([7, 7]);
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(cx, cy, rocheR, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.restore();
-
-  // 4. Posiciones y Enlaces de la Constelación (Sin revelar las palabras)
-  const pts = satellites.map((s) => ({
-    sat: s,
-    x: cx + Math.cos(s.displayAngle) * (s.orbitRadiusRatio * maxR),
-    y: cy + Math.sin(s.displayAngle) * (s.orbitRadiusRatio * maxR),
-  }));
-  const mapPts = new Map(pts.map((p) => [p.sat.uid, p]));
-
-  telemetry.edges.forEach((edge) => {
-    const a = mapPts.get(edge.uidA);
-    const b = mapPts.get(edge.uidB);
+  const pts = sats.map((s) => ({ s, x: cx + Math.cos(s.angle) * s.radius * R, y: cy + Math.sin(s.angle) * s.radius * R }));
+  const map = new Map(pts.map((p) => [p.s.uid, p]));
+  tel.edges.forEach((e) => {
+    const a = map.get(e.a);
+    const b = map.get(e.b);
     if (!a || !b) return;
-    ctx.save();
-    if (edge.status === 'resonance') {
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.78)';
-      ctx.lineWidth = 3.2;
-    } else if (edge.status === 'stable') {
-      ctx.strokeStyle = 'rgba(226, 221, 213, 0.35)';
-      ctx.lineWidth = 2.2;
-    } else {
-      ctx.strokeStyle = 'rgba(244, 63, 94, 0.82)';
-      ctx.setLineDash([10, 8]);
-      ctx.lineWidth = 3.5;
-    }
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-    ctx.restore();
+    c.save();
+    c.lineWidth = 3;
+    if (e.status === 'friction') {
+      c.strokeStyle = 'rgba(244,63,94,0.85)';
+      c.setLineDash([12, 9]);
+    } else c.strokeStyle = e.status === 'resonance' ? 'rgba(45,212,191,0.7)' : 'rgba(244,240,234,0.25)';
+    c.beginPath();
+    c.moveTo(a.x, a.y);
+    c.lineTo(b.x, b.y);
+    c.stroke();
+    c.restore();
   });
 
-  // Astro central
-  ctx.save();
-  ctx.fillStyle = '#07090F';
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 4;
-  ctx.shadowColor = accent;
-  ctx.shadowBlur = 28;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 48, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.restore();
+  c.fillStyle = '#07090F';
+  c.strokeStyle = accent;
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(cx, cy, 46, 0, Math.PI * 2);
+  c.fill();
+  c.stroke();
 
-  ctx.fillStyle = '#FAF8F5';
-  ctx.font = '700 20px monospace';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('w₀', cx, cy + 1);
-
-  // Nodos anónimos (símbolos geométricos)
-  pts.forEach(({ sat, x, y }, idx) => {
-    ctx.save();
-    ctx.fillStyle = '#07090F';
-    ctx.strokeStyle = sat.color.hex;
-    ctx.lineWidth = 4;
-    ctx.shadowColor = sat.color.hex;
-    ctx.shadowBlur = 22;
-    ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.fillStyle = sat.color.hex;
-    ctx.font = '700 18px monospace';
-    ctx.fillText(`${idx + 1}`, x, y + 1);
+  pts.forEach(({ s, x, y }) => {
+    c.fillStyle = '#07090F';
+    c.strokeStyle = s.color;
+    c.lineWidth = 4;
+    c.beginPath();
+    c.arc(x, y, 20, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+    c.fillStyle = s.color;
+    c.font = '700 20px monospace';
+    c.textBaseline = 'middle';
+    c.fillText(TIER_GLYPH[s.tier], x, y + 1);
   });
 
-  // 5. Bloque Inferior de Telemetría y Puntaje
-  ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = 'rgba(226, 221, 213, 0.6)';
-  ctx.font = '600 20px monospace';
-  ctx.fillText('ÍNDICE DIVERGENTE', cx, 1068);
+  c.textBaseline = 'alphabetic';
+  c.fillStyle = '#FAF8F5';
+  c.font = '700 110px monospace';
+  c.fillText(tel.score.toFixed(1), cx, 1150);
+  c.fillStyle = tel.rank.color;
+  c.font = '700 32px sans-serif';
+  c.fillText(tel.rank.title.toUpperCase(), cx, 1204);
+  c.fillStyle = 'rgba(229,169,60,0.6)';
+  c.font = '500 20px monospace';
+  c.fillText('orbita · pensamiento divergente diario', cx, 1290);
 
-  ctx.fillStyle = '#FAF8F5';
-  ctx.font = '700 92px monospace';
-  ctx.fillText(`${telemetry.score.toFixed(1)}`, cx, 1158);
-
-  ctx.fillStyle = telemetry.rank.badgeColor;
-  ctx.font = '700 30px sans-serif';
-  ctx.fillText(telemetry.rank.title.toUpperCase(), cx, 1206);
-
-  const track = Array.from({ length: MAX_IMPULSES }, (_, i) => {
-    const e = impulseLog[i];
-    if (!e) return '○';
-    if (e.outcome === 'ORBIT_CAPTURE') return '◈';
-    if (e.outcome === 'ROCHE_LIMIT') return '✕';
-    if (e.outcome === 'OUTER_VOID') return '◌';
-    return '↺';
-  }).join('   ');
-
-  ctx.fillStyle = 'rgba(244, 240, 234, 0.72)';
-  ctx.font = '600 24px monospace';
-  ctx.fillText(track, cx, 1255);
-
-  ctx.fillStyle = 'rgba(229, 169, 60, 0.55)';
-  ctx.font = '500 18px monospace';
-  ctx.fillText('ÓRBITA · LABORATORIO DIARIO DE PENSAMIENTO DIVERGENTE', cx, 1292);
-
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/png', 0.95);
-  });
+  return new Promise((res) => cv.toBlob((b) => res(b), 'image/png', 0.95));
 }

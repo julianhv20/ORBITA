@@ -1,0 +1,14 @@
+{
+  "LUNA": ["marea", "lobo", "poeta", "locura", "cráter", "eclipse", "plata", "miel", "cohete", "calendario", "insomnio", "sonámbulo", "ciclo", "queso", "serenata", "verne", "selene", "mareas", "hechizo", "licántropo"],
+  "PAPEL": ["origami", "china", "billete", "bosque", "celulosa", "periódico", "avión", "pergamino", "papiro", "tijera", "piedra", "reciclaje", "oficina", "burocracia", "dinero", "carta", "tinta", "pulpa", "mapa", "cometa"],
+  "SAL": ["océano", "salario", "conservar", "herida", "lágrima", "cristal", "desierto", "volcán", "sodio", "minería", "roma", "pimienta", "nieve", "camino", "mar", "alquimia", "muerto", "estatua", "sudor", "mina"],
+  "VIENTO": ["molino", "veleta", "tormenta", "arena", "huracán", "velero", "cometa", "flauta", "desierto", "polen", "energía", "turbina", "susurro", "tango", "gaita", "aire", "ola", "escultura", "helicóptero", "dante"],
+  "LLAVE": ["cerradura", "secreto", "piano", "inglesa", "cripta", "carcelero", "criptografía", "pared", "paso", "tubería", "grifo", "llavero", "pedro", "música", "contraseña", "cofre", "tesoro", "calabozo", "mayordomo", "candado"],
+  "MAPA": ["tesoro", "pirata", "gps", "brújula", "cartógrafo", "territorio", "genoma", "cerebro", "metro", "escala", "colón", "isla", "ruta", "atlas", "fronteras", "mercator", "explorador", "cielo", "viaje", "proyección"],
+  "HIELO": ["glaciar", "polo", "mamut", "coctel", "patín", "iceberg", "titanic", "eclipse", "hockey", "cubo", "frío", "deshielo", "clima", "esquimal", "escultura", "cueva", "nieve", "ártico", "antártida", "tundra"],
+  "CASTILLO": ["foso", "dragón", "caballero", "princesa", "arena", "naipes", "ajedrez", "torre", "puente", "leyenda", "rey", "fantasma", "medieval", "asedio", "cuento", "disney", "cuatro", "torreón", "feudal", "dracula"],
+  "MÁSCARA": ["carnaval", "venecia", "teatro", "buceo", "gas", "mentira", "identidad", "bailarín", "quirófano", "lucha", "héroe", "zorro", "disfraz", "grecia", "tragedia", "oxígeno", "belleza", "africana", "anonymous", "pandemia"],
+  "ISLA": ["náufrago", "robinson", "tesoro", "volcán", "archipiélago", "pascua", "calor", "aislamiento", "tortuga", "darwin", "galápagos", "utopía", "paraíso", "cárcel", "palmera", "corales", "barco", "ron", "borneo", "isla"],
+  "SEMILLA": ["girasol", "bosque", "futuro", "sandía", "ave", "viento", "desierto", "banco", "genética", "agricultura", "fe", "aguacate", "pepita", "bomba", "idea", "mostaza", "polen", "invernadero", "cosecha", "sembrar"],
+  "ESCALERA": ["caracol", "mecánica", "incendio", "bombero", "pintor", "dalí", "jacob", "cielo", "serpiente", "hotel", "escher", "nube", "azotea", "cuerda", "espiral", "peldaño", "ascenso", "mano", "emergencia", "ascensor"]
+}
