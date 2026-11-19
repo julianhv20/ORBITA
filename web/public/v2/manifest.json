@@ -2,6 +2,28 @@
  "v": 2,
  "epochDate": "2026-11-18",
  "tzOffsetMinutes": -300,
+ "domains": [
+  "Cronometría y Tiempo",
+  "Física y Cuántica",
+  "Astronomía y Cosmos",
+  "Biología y Flora",
+  "Fauna y Etología",
+  "Cuerpo y Medicina",
+  "Arte y Estética",
+  "Literatura y Mito",
+  "Música y Acústica",
+  "Arquitectura y Ciudad",
+  "Ingeniería y Mecánica",
+  "Cómputo y Redes",
+  "Geología y Materia",
+  "Océano e Hidrología",
+  "Termodinámica y Fuego",
+  "Mente y Psicología",
+  "Filosofía y Sociedad",
+  "Gastronomía y Cultivo",
+  "Juegos y Estrategia",
+  "Oficios y Objetos"
+ ],
  "scoring": {
   "wMean": 0.9,
   "wMin": 0.1,
@@ -17,7 +39,7 @@
   "bin": "vocab.bin",
   "words": "vocab_words.txt",
   "dim": 64,
-  "count": 24311
+  "count": 24313
  },
  "puzzles": [
   {

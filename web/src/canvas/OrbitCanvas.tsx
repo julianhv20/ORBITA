@@ -13,13 +13,156 @@ interface Burst {
   parts: { vx: number; vy: number; s: number }[];
 }
 
-const STARS = Array.from({ length: 70 }, (_, i) => ({
+const STARS = Array.from({ length: 75 }, (_, i) => ({
   x: (Math.sin(i * 12.9898) * 43758.5453) % 1,
   y: (Math.sin(i * 78.233) * 12543.1234) % 1,
   s: 0.4 + (i % 4) * 0.35,
-  v: 0.004 + (i % 5) * 0.0025,
+  v: 0.003 + (i % 5) * 0.002,
   p: i * 0.9,
 }));
+
+/**
+ * Dibuja un satélite espacial estilizado (sonda astro-cartográfica con paneles solares,
+ * estela orbital curva y núcleo según su tipo de conexión).
+ */
+function drawSatelliteCraft(
+  c: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  x: number,
+  y: number,
+  orbitR: number,
+  angle: number,
+  sat: Satellite,
+  selected: boolean,
+  timeSec: number
+) {
+  // 1. Estela curva orbital detrás del satélite
+  c.save();
+  const wakeArc = 0.24;
+  const wakeGrad = c.createLinearGradient(
+    cx + Math.cos(angle - wakeArc) * orbitR,
+    cy + Math.sin(angle - wakeArc) * orbitR,
+    x,
+    y
+  );
+  wakeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  wakeGrad.addColorStop(1, `${sat.color}66`);
+  c.strokeStyle = wakeGrad;
+  c.lineWidth = selected ? 2.2 : 1.4;
+  c.beginPath();
+  c.arc(cx, cy, orbitR, angle - wakeArc, angle);
+  c.stroke();
+  c.restore();
+
+  // 2. Halo energético del satélite
+  const haloR = selected ? 28 : 22;
+  const sg = c.createRadialGradient(x, y, 2, x, y, haloR);
+  sg.addColorStop(0, `${sat.color}48`);
+  sg.addColorStop(0.6, `${sat.color}14`);
+  sg.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = sg;
+  c.beginPath();
+  c.arc(x, y, haloR, 0, Math.PI * 2);
+  c.fill();
+
+  // 3. Cuerpo del satélite orientado tangencialmente a su órbita
+  c.save();
+  c.translate(x, y);
+  c.rotate(angle + Math.PI / 2);
+
+  // Retícula giratoria si está seleccionado
+  if (selected) {
+    c.save();
+    c.rotate(timeSec * 0.9);
+    c.strokeStyle = sat.color;
+    c.lineWidth = 1.1;
+    c.setLineDash([4, 4]);
+    c.beginPath();
+    c.arc(0, 0, 15, 0, Math.PI * 2);
+    c.stroke();
+    c.restore();
+  }
+
+  // Eje / mástil transversal de los paneles solares
+  const wingSpan = sat.tier === 'bridge' ? 15 : sat.tier === 'near' ? 13 : 10.5;
+  c.strokeStyle = 'rgba(244, 240, 234, 0.55)';
+  c.lineWidth = 1.2;
+  c.beginPath();
+  c.moveTo(-wingSpan, 0);
+  c.lineTo(wingSpan, 0);
+  c.stroke();
+
+  // Alas / Paneles Solares Izquierdo y Derecho
+  const panelW = sat.tier === 'bridge' ? 6.5 : 5.5;
+  const panelH = sat.tier === 'bridge' ? 4.4 : 3.8;
+  const innerGap = 5.8;
+
+  [-1, 1].forEach((dir) => {
+    const px = dir === -1 ? -innerGap - panelW : innerGap;
+    const py = -panelH / 2;
+    c.fillStyle = '#090D18';
+    c.strokeStyle = sat.color;
+    c.lineWidth = 1.15;
+    c.beginPath();
+    c.roundRect(px, py, panelW, panelH, 1.2);
+    c.fill();
+    c.stroke();
+
+    // Sub-celda solar interna
+    c.strokeStyle = `${sat.color}66`;
+    c.lineWidth = 0.7;
+    c.beginPath();
+    c.moveTo(px + panelW / 2, py);
+    c.lineTo(px + panelW / 2, py + panelH);
+    c.stroke();
+  });
+
+  // Antena frontal apuntando en dirección de vuelo
+  c.strokeStyle = 'rgba(244, 240, 234, 0.65)';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(0, -4.5);
+  c.lineTo(0, -8.5);
+  c.stroke();
+  c.fillStyle = sat.color;
+  c.beginPath();
+  c.arc(0, -8.8, 1.3, 0, Math.PI * 2);
+  c.fill();
+
+  // Chasis central (Rombo dorado para Puente ✦, Hexágono/Cápsula para Cercana ◈, Disco para Lejana ○)
+  c.fillStyle = '#07090F';
+  c.strokeStyle = sat.color;
+  c.lineWidth = selected ? 2.2 : 1.7;
+  c.shadowColor = sat.color;
+  c.shadowBlur = selected ? 12 : 6;
+
+  if (sat.tier === 'bridge') {
+    const r = 5.6;
+    c.beginPath();
+    c.moveTo(0, -r);
+    c.lineTo(r, 0);
+    c.lineTo(0, r);
+    c.lineTo(-r, 0);
+    c.closePath();
+    c.fill();
+    c.stroke();
+  } else {
+    c.beginPath();
+    c.arc(0, 0, 4.8, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+  }
+
+  // Núcleo luminoso interior
+  c.shadowBlur = 0;
+  c.fillStyle = sat.color;
+  c.beginPath();
+  c.arc(0, 0, sat.tier === 'bridge' ? 2.2 : 1.8, 0, Math.PI * 2);
+  c.fill();
+
+  c.restore();
+}
 
 export const OrbitCanvas: React.FC = () => {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -60,7 +203,6 @@ export const OrbitCanvas: React.FC = () => {
     };
   }, [ctxGame, sats, telemetry, probe, selected]);
 
-  // efectos puntuales (rechazo / captura)
   useEffect(() => {
     if (!fx || fx.id === lastFx.current || !wrapRef.current) return;
     lastFx.current = fx.id;
@@ -86,7 +228,7 @@ export const OrbitCanvas: React.FC = () => {
           y: cy + Math.sin(s.angle) * s.radius * maxR,
           at: performance.now(),
           color: s.color,
-          parts: mk(12, 46),
+          parts: mk(14, 48),
         });
       }
     }
@@ -133,8 +275,10 @@ export const OrbitCanvas: React.FC = () => {
       const cx = w / 2;
       const cy = h / 2;
       const maxR = Math.min(w, h) * 0.44;
+      const rocheR = maxR * 0.24;
+      const outerR = maxR * 0.86;
 
-      // estrellas con deriva lenta
+      // 1. Estrellas con deriva lenta
       for (const s of STARS) {
         const px = (((s.x + t * s.v) % 1) + 1) % 1;
         const py = (((s.y + t * s.v * 0.4) % 1) + 1) % 1;
@@ -144,51 +288,79 @@ export const OrbitCanvas: React.FC = () => {
         c.fill();
       }
 
-      // halo
+      // 2. Halo ambiental
       const halo = c.createRadialGradient(cx, cy, 10, cx, cy, maxR * 1.05);
-      halo.addColorStop(0, L.resonant ? 'rgba(229,169,60,0.13)' : 'rgba(229,169,60,0.07)');
+      halo.addColorStop(0, L.resonant ? 'rgba(229,169,60,0.14)' : 'rgba(229,169,60,0.07)');
+      halo.addColorStop(0.55, 'rgba(45,212,191,0.03)');
       halo.addColorStop(1, 'rgba(4,5,8,0)');
       c.fillStyle = halo;
       c.beginPath();
       c.arc(cx, cy, maxR * 1.05, 0, Math.PI * 2);
       c.fill();
 
-      // anillos sobrios
+      // 3. Astrolabio graduado y anillos orbitales
+      c.save();
+      c.strokeStyle = 'rgba(229, 169, 60, 0.16)';
       c.lineWidth = 1;
-      [0.5, 0.8].forEach((rr, i) => {
-        c.strokeStyle = `rgba(244,240,234,${i ? 0.09 : 0.06})`;
-        c.setLineDash(i ? [] : [3, 7]);
+      c.beginPath();
+      c.arc(cx, cy, outerR, 0, Math.PI * 2);
+      c.stroke();
+
+      for (let deg = 0; deg < 360; deg += 10) {
+        const rad = (deg * Math.PI) / 180;
+        const isMajor = deg % 30 === 0;
+        const len = isMajor ? 6 : 3;
+        c.strokeStyle = isMajor ? 'rgba(229, 169, 60, 0.35)' : 'rgba(244, 240, 234, 0.1)';
+        c.beginPath();
+        c.moveTo(cx + Math.cos(rad) * (outerR - len), cy + Math.sin(rad) * (outerR - len));
+        c.lineTo(cx + Math.cos(rad) * outerR, cy + Math.sin(rad) * outerR);
+        c.stroke();
+      }
+
+      [0.46, 0.66].forEach((rr) => {
+        c.strokeStyle = 'rgba(244,240,234,0.065)';
+        c.setLineDash([3, 7]);
         c.beginPath();
         c.arc(cx, cy, maxR * rr, 0, Math.PI * 2);
         c.stroke();
       });
-      c.setLineDash([4, 6]);
-      c.strokeStyle = 'rgba(244,63,94,0.28)';
+
+      // Anillo Interior: Límite de Roche
+      c.setLineDash([4, 5]);
+      c.strokeStyle = 'rgba(244,63,94,0.38)';
       c.lineDashOffset = -t * 6;
       c.beginPath();
-      c.arc(cx, cy, maxR * 0.22, 0, Math.PI * 2);
+      c.arc(cx, cy, rocheR, 0, Math.PI * 2);
       c.stroke();
       c.setLineDash([]);
 
-      // barrido suave
+      if (maxR > 125) {
+        c.fillStyle = 'rgba(251, 113, 133, 0.5)';
+        c.font = '500 8.5px "JetBrains Mono", monospace';
+        c.textAlign = 'center';
+        c.fillText('LÍMITE DE ROCHE', cx, cy + rocheR + 11);
+      }
+      c.restore();
+
+      // 4. Barrido suave de radar
       if (!reduce) {
-        const sw = c.createConicGradient(t * 0.35, cx, cy);
-        sw.addColorStop(0, 'rgba(244,240,234,0.05)');
-        sw.addColorStop(0.1, 'rgba(244,240,234,0)');
-        sw.addColorStop(1, 'rgba(244,240,234,0)');
+        const sw = c.createConicGradient(t * 0.32, cx, cy);
+        sw.addColorStop(0, 'rgba(45,212,191,0.05)');
+        sw.addColorStop(0.11, 'rgba(45,212,191,0)');
+        sw.addColorStop(1, 'rgba(45,212,191,0)');
         c.fillStyle = sw;
         c.beginPath();
-        c.arc(cx, cy, maxR * 0.8, 0, Math.PI * 2);
+        c.arc(cx, cy, outerR, 0, Math.PI * 2);
         c.fill();
       }
 
-      // posiciones animadas con respiracion
+      // 5. Posiciones animadas de satélites
       const alive = new Set(L.sats.map((s) => s.uid));
       anim.current.forEach((_, k) => !alive.has(k) && anim.current.delete(k));
       const pos = L.sats.map((s, i) => {
         let a = anim.current.get(s.uid);
         if (!a) {
-          a = { r: 0.2, a: s.angle };
+          a = { r: 0.22, a: s.angle };
           anim.current.set(s.uid, a);
         }
         let d = s.angle - a.a;
@@ -196,22 +368,22 @@ export const OrbitCanvas: React.FC = () => {
         while (d < -Math.PI) d += Math.PI * 2;
         a.a += d * Math.min(1, dt * 6);
         a.r += (s.radius - a.r) * Math.min(1, dt * 5);
-        const ang = a.a + Math.sin(t * 0.5 + i * 1.7) * 0.05;
-        const rr = a.r * maxR + Math.sin(t * 0.9 + i * 2.1) * 3;
-        return { s, x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr };
+        const ang = a.a + Math.sin(t * 0.45 + i * 1.7) * 0.04;
+        const rr = a.r * maxR + Math.sin(t * 0.85 + i * 2.1) * 2.5;
+        return { s, x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr, rr, ang };
       });
       const byUid = new Map(pos.map((p) => [p.s.uid, p]));
 
-      // hilos al centro
+      // 6. Hilos gravitacionales al centro
       pos.forEach(({ x, y }) => {
-        c.strokeStyle = 'rgba(244,240,234,0.07)';
+        c.strokeStyle = 'rgba(244,240,234,0.075)';
         c.beginPath();
         c.moveTo(cx, cy);
         c.lineTo(x, y);
         c.stroke();
       });
 
-      // aristas
+      // 7. Aristas de Tensión / Resonancia + Etiquetas d=0.XX
       L.edges.forEach((e) => {
         const A = byUid.get(e.a);
         const B = byUid.get(e.b);
@@ -223,24 +395,45 @@ export const OrbitCanvas: React.FC = () => {
         c.save();
         if (e.status === 'friction') {
           c.strokeStyle = `rgba(244,63,94,${0.55 + 0.35 * Math.sin(t * 5)})`;
-          c.lineWidth = 1.8;
+          c.lineWidth = 2.0;
           c.setLineDash([5, 4]);
           c.lineDashOffset = -t * 18;
         } else if (e.status === 'resonance') {
-          c.strokeStyle = sel ? 'rgba(229,169,60,0.9)' : 'rgba(45,212,191,0.4)';
-          c.lineWidth = sel ? 2 : 1.3;
+          c.strokeStyle = sel ? 'rgba(229,169,60,0.92)' : 'rgba(16,185,129,0.48)';
+          c.lineWidth = sel ? 2.1 : 1.4;
         } else {
-          c.strokeStyle = sel ? 'rgba(244,240,234,0.7)' : 'rgba(244,240,234,0.16)';
-          c.lineWidth = sel ? 1.8 : 1;
+          c.strokeStyle = sel ? 'rgba(244,240,234,0.75)' : 'rgba(244,240,234,0.18)';
+          c.lineWidth = sel ? 1.8 : 1.1;
         }
         c.beginPath();
         c.moveTo(A.x, A.y);
         c.lineTo(A.x + (B.x - A.x) * p, A.y + (B.y - A.y) * p);
         c.stroke();
         c.restore();
+
+        // Píldora de distancia coseno d en colisiones o nodo seleccionado
+        if (p >= 1 && (e.status === 'friction' || sel)) {
+          const mx = (A.x + B.x) / 2;
+          const my = (A.y + B.y) / 2;
+          c.save();
+          c.fillStyle = 'rgba(7, 9, 15, 0.92)';
+          c.strokeStyle =
+            e.status === 'friction' ? 'rgba(244, 63, 94, 0.75)' : 'rgba(45, 212, 191, 0.65)';
+          c.lineWidth = 1;
+          c.beginPath();
+          c.roundRect(mx - 20, my - 8, 40, 16, 5);
+          c.fill();
+          c.stroke();
+          c.fillStyle = e.status === 'friction' ? '#FDA4AF' : '#A7F3D0';
+          c.font = '600 8.5px "JetBrains Mono", monospace';
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText(`d:${e.dNorm.toFixed(2)}`, mx, my + 0.5);
+          c.restore();
+        }
       });
 
-      // sonda en vuelo
+      // 8. Sonda en vuelo
       if (L.probe) {
         const k = Math.min(1, (now - L.probe.startedAt) / L.probe.durationMs);
         const ease = 1 - Math.pow(1 - k, 2.2);
@@ -258,20 +451,20 @@ export const OrbitCanvas: React.FC = () => {
         const [tx, ty] = at(Math.max(0, ease - 0.15));
         const g = c.createLinearGradient(tx, ty, px, py);
         g.addColorStop(0, 'rgba(229,169,60,0)');
-        g.addColorStop(1, 'rgba(250,248,245,0.9)');
+        g.addColorStop(1, 'rgba(250,248,245,0.92)');
         c.strokeStyle = g;
-        c.lineWidth = 2;
+        c.lineWidth = 2.2;
         c.beginPath();
         c.moveTo(tx, ty);
         c.lineTo(px, py);
         c.stroke();
         c.fillStyle = '#FAF8F5';
         c.beginPath();
-        c.arc(px, py, 3.6, 0, Math.PI * 2);
+        c.arc(px, py, 4, 0, Math.PI * 2);
         c.fill();
       }
 
-      // rafagas
+      // 9. Ráfagas de partículas
       bursts.current = bursts.current.filter((b) => now - b.at < 900);
       bursts.current.forEach((b) => {
         const k = (now - b.at) / 900;
@@ -280,15 +473,15 @@ export const OrbitCanvas: React.FC = () => {
         c.globalAlpha = 1 - k;
         if (b.kind === 'capture') {
           c.strokeStyle = b.color;
-          c.lineWidth = 1.4;
+          c.lineWidth = 1.5;
           c.beginPath();
-          c.arc(b.x, b.y, 8 + k * 30, 0, Math.PI * 2);
+          c.arc(b.x, b.y, 10 + k * 32, 0, Math.PI * 2);
           c.stroke();
         } else {
           c.strokeStyle = '#F43F5E';
           c.lineWidth = 2;
           c.beginPath();
-          c.arc(cx, cy, maxR * 0.22 * (1 - k * 0.3), 0, Math.PI * 2);
+          c.arc(cx, cy, rocheR * (1 - k * 0.3), 0, Math.PI * 2);
           c.stroke();
         }
         c.fillStyle = b.color;
@@ -300,9 +493,9 @@ export const OrbitCanvas: React.FC = () => {
         c.restore();
       });
 
-      // nucleo
+      // 10. Astro Central (Palabra Núcleo w0) con anillo de cardán giratorio
       const pulse = 1 + 0.03 * Math.sin(t * 2);
-      const cr = Math.max(26, Math.min(40, maxR * 0.17));
+      const cr = Math.max(26, Math.min(38, maxR * 0.165));
       const cg = c.createRadialGradient(cx, cy, 2, cx, cy, cr * 2.4 * pulse);
       cg.addColorStop(0, `${L.accent}55`);
       cg.addColorStop(1, 'rgba(0,0,0,0)');
@@ -310,58 +503,66 @@ export const OrbitCanvas: React.FC = () => {
       c.beginPath();
       c.arc(cx, cy, cr * 2.4 * pulse, 0, Math.PI * 2);
       c.fill();
+
+      c.save();
+      c.translate(cx, cy);
+      c.rotate(t * 0.15);
+      c.strokeStyle = `${L.accent}66`;
+      c.lineWidth = 1;
+      c.setLineDash([6, 4]);
+      c.beginPath();
+      c.arc(0, 0, cr + 5, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+
       c.fillStyle = '#07090F';
       c.strokeStyle = L.accent;
-      c.lineWidth = 1.6;
+      c.lineWidth = 2;
       c.beginPath();
       c.arc(cx, cy, cr, 0, Math.PI * 2);
       c.fill();
       c.stroke();
+
       c.fillStyle = '#FAF8F5';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
-      const fs = Math.max(9, Math.min(13, (cr * 1.7) / Math.max(4, L.core.length) * 1.7));
-      c.font = `600 ${fs}px "JetBrains Mono", monospace`;
+      const fs = Math.max(9, Math.min(12.5, ((cr * 1.7) / Math.max(4, L.core.length)) * 1.7));
+      c.font = `700 ${fs}px "JetBrains Mono", monospace`;
       c.fillText(L.core, cx, cy + 0.5);
 
-      // satelites
+      // 11. Satélites Espaciales + Cápsula de Nombre y Dominio
       const ht: { uid: string; x: number; y: number }[] = [];
-      pos.forEach(({ s, x, y }) => {
+      pos.forEach(({ s, x, y, rr, ang }) => {
         const sel = L.selected === s.uid;
-        const rn = sel ? 8.5 : 7;
         ht.push({ uid: s.uid, x, y });
-        const sg = c.createRadialGradient(x, y, 1, x, y, rn * 3);
-        sg.addColorStop(0, `${s.color}40`);
-        sg.addColorStop(1, 'rgba(0,0,0,0)');
-        c.fillStyle = sg;
+
+        drawSatelliteCraft(c, cx, cy, x, y, rr, ang, s, sel, t);
+
+        // Etiqueta tipo cápsula debajo de la sonda
+        c.save();
+        c.font = '600 10.5px "JetBrains Mono", monospace';
+        const prefix = s.tier === 'bridge' ? '✦ ' : s.tier === 'near' ? '◈ ' : '○ ';
+        const label = prefix + s.word;
+        const tw = c.measureText(label).width;
+        const padX = 7;
+        const boxW = tw + padX * 2;
+        const boxH = 19;
+        const bx = Math.max(4, Math.min(w - boxW - 4, x - boxW / 2));
+        const by = y > cy + maxR * 0.55 ? y - 16 - boxH : y + 15;
+
+        c.fillStyle = sel ? 'rgba(13, 17, 28, 0.96)' : 'rgba(7, 9, 15, 0.88)';
+        c.strokeStyle = sel ? s.color : 'rgba(244, 240, 234, 0.22)';
+        c.lineWidth = sel ? 1.4 : 1;
         c.beginPath();
-        c.arc(x, y, rn * 3, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = '#07090F';
-        c.strokeStyle = s.color;
-        c.lineWidth = s.tier === 'far' ? 1.2 : 2;
-        c.setLineDash(s.tier === 'far' ? [2, 3] : []);
-        c.beginPath();
-        c.arc(x, y, rn, 0, Math.PI * 2);
+        c.roundRect(bx, by, boxW, boxH, 6);
         c.fill();
         c.stroke();
-        c.setLineDash([]);
-        c.fillStyle = s.color;
-        c.beginPath();
-        c.arc(x, y, s.tier === 'bridge' ? 3.4 : 2.4, 0, Math.PI * 2);
-        c.fill();
 
-        c.font = '600 11px "JetBrains Mono", monospace';
-        const label = (s.tier === 'bridge' ? '✦ ' : '') + s.word;
-        const tw = c.measureText(label).width;
-        const lx = Math.max(4, Math.min(w - tw - 4, x - tw / 2));
-        const ly = y > cy + maxR * 0.55 ? y - rn - 9 : y + rn + 13;
-        c.fillStyle = 'rgba(4,5,8,0.7)';
-        c.fillRect(lx - 3, ly - 10, tw + 6, 14);
         c.fillStyle = '#F4F0EA';
-        c.textAlign = 'left';
-        c.fillText(label, lx, ly);
         c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(label, bx + boxW / 2, by + boxH / 2 + 0.5);
+        c.restore();
       });
       hits.current = ht;
 
@@ -380,13 +581,13 @@ export const OrbitCanvas: React.FC = () => {
     if (!r) return;
     const x = e.clientX - r.left;
     const y = e.clientY - r.top;
-    const hit = hits.current.find((p) => Math.hypot(p.x - x, p.y - y) < 26);
+    const hit = hits.current.find((p) => Math.hypot(p.x - x, p.y - y) < 28);
     setSelected(hit && hit.uid !== selected ? hit.uid : null);
   };
 
   return (
     <div ref={wrapRef} className="absolute inset-0 select-none">
-      <canvas ref={canvasRef} onPointerDown={onPointer} className="block h-full w-full touch-manipulation" />
+      <canvas ref={canvasRef} onPointerDown={onPointer} className="block h-full w-full cursor-pointer touch-manipulation" />
     </div>
   );
 };

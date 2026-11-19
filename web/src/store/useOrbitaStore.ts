@@ -6,6 +6,7 @@ import {
   LeaderboardData,
   Manifest,
   ManifestPuzzle,
+  RejectionEntry,
   Satellite,
   Telemetry,
   Vocab,
@@ -68,6 +69,7 @@ interface Store {
   mode: 'daily' | 'practice';
 
   satellites: Satellite[];
+  rejections: RejectionEntry[];
   telemetry: Telemetry;
   swapsLeft: number;
   misses: number;
@@ -148,6 +150,7 @@ export const useOrbitaStore = create<Store>((set, get) => ({
   mode: 'daily',
 
   satellites: [],
+  rejections: [],
   telemetry: EMPTY_TELEMETRY,
   swapsLeft: MAX_SWAPS,
   misses: 0,
@@ -205,16 +208,23 @@ export const useOrbitaStore = create<Store>((set, get) => ({
     const ctx = buildContext(vocab, day, manifest.scoring);
 
     let satellites: Satellite[] = [];
+    let rejections: RejectionEntry[] = [];
     let swapsLeft = MAX_SWAPS;
     let misses = 0;
     let sealed = false;
     if (mode === 'daily') {
-      const saved = read<{ dayKey: string; puzzleId: string; satellites: Satellite[]; swapsLeft: number; misses: number; sealed: boolean } | null>(
-        K_PROGRESS,
-        null
-      );
+      const saved = read<{
+        dayKey: string;
+        puzzleId: string;
+        satellites: Satellite[];
+        rejections?: RejectionEntry[];
+        swapsLeft: number;
+        misses: number;
+        sealed: boolean;
+      } | null>(K_PROGRESS, null);
       if (saved && saved.dayKey === todayKey && saved.puzzleId === entry.id) {
         satellites = saved.satellites;
+        rejections = saved.rejections ?? [];
         swapsLeft = saved.swapsLeft;
         misses = saved.misses;
         sealed = saved.sealed;
@@ -226,6 +236,7 @@ export const useOrbitaStore = create<Store>((set, get) => ({
       entry,
       mode,
       satellites,
+      rejections,
       swapsLeft,
       misses,
       sealed,
@@ -262,7 +273,19 @@ export const useOrbitaStore = create<Store>((set, get) => ({
       };
       if (out.kind === 'ROCHE') {
         synth.playRocheBurn();
-        set({ fx: { id: ++fxCounter, kind: 'roche', word: out.word }, misses: s.misses + 1 });
+        const rej: RejectionEntry = {
+          id: `r${Date.now()}`,
+          word: out.word,
+          kind: 'roche',
+          reason: out.reason,
+        };
+        const nextRejections = [...s.rejections, rej];
+        set({
+          fx: { id: ++fxCounter, kind: 'roche', word: out.word },
+          misses: s.misses + 1,
+          rejections: nextRejections,
+        });
+        persistProgress(get());
       }
       set({ feedback: fb(msg[out.kind], out.kind === 'ROCHE' ? 'bad' : 'warn'), shakeNonce: s.shakeNonce + 1 });
       return;
@@ -415,6 +438,7 @@ function persistProgress(s: Store) {
     dayKey: s.todayKey,
     puzzleId: s.entry.id,
     satellites: s.satellites,
+    rejections: s.rejections,
     swapsLeft: s.swapsLeft,
     misses: s.misses,
     sealed: s.sealed,

@@ -17,6 +17,7 @@ export interface Manifest {
   v: number;
   epochDate: string;
   tzOffsetMinutes: number;
+  domains?: string[];
   scoring: Scoring;
   vocab: { bin: string; words: string; dim: number; count: number };
   puzzles: ManifestPuzzle[];
@@ -40,6 +41,7 @@ export interface DayData {
   roche: string[];
   bridges: number[];
   hasBridges: boolean;
+  notes?: Record<string, [string, string]>;
   anchors: Anchors;
   master: number[];
   basis: number[][];
@@ -53,6 +55,8 @@ export interface Vocab {
   words: string[];
   /** vectores unitarios (count * dim) */
   unit: Float32Array;
+  domainIds: Uint8Array;
+  domains: string[];
   normToIdx: Map<string, number>;
 }
 
@@ -72,6 +76,8 @@ export interface Satellite {
   uid: string;
   idx: number;
   word: string;
+  domain: string;
+  insight: string;
   tier: ConnectionTier;
   gravity: number;
   angle: number;
@@ -80,9 +86,16 @@ export interface Satellite {
   addedAt: number;
 }
 
+export interface RejectionEntry {
+  id: string;
+  word: string;
+  kind: 'roche' | 'unknown';
+  reason: string;
+}
+
 export type LaunchOutcome =
   | { kind: 'CAPTURE'; sat: Omit<Satellite, 'uid' | 'addedAt' | 'color'> }
-  | { kind: 'ROCHE'; word: string }
+  | { kind: 'ROCHE'; word: string; reason: string }
   | { kind: 'UNKNOWN'; word: string }
   | { kind: 'DUPLICATE'; word: string }
   | { kind: 'SELF'; word: string }
@@ -94,6 +107,8 @@ export interface Edge {
   wordA: string;
   wordB: string;
   d: number;
+  /** Distancia normalizada en escala DAT [0.15..0.96] (< 0.58 Friccion, >= 0.76 Resonancia) */
+  dNorm: number;
   status: 'friction' | 'stable' | 'resonance';
 }
 
@@ -101,18 +116,36 @@ export interface Rank {
   title: string;
   tier: 'supernova' | 'architect' | 'navigator' | 'explorer' | 'linear';
   color: string;
+  percentileLabel: string;
 }
 
 export interface Telemetry {
   count: number;
+  pairCount: number;
   score: number;
   divergence: number;
   connection: number;
   frictionCount: number;
   closest: Edge | null;
+  farthest: Edge | null;
   edges: Edge[];
   rank: Rank;
   isResonant: boolean;
+}
+
+export interface MasterItemDetail {
+  word: string;
+  domain: string;
+  insight: string;
+  tier: ConnectionTier;
+}
+
+export interface MasterConstellationInfo {
+  score: number;
+  minDNorm: number;
+  distinctDomains: number;
+  whySummary: string;
+  items: MasterItemDetail[];
 }
 
 export interface HistoryEntry {
@@ -128,6 +161,7 @@ export interface DayProgress {
   dayKey: string;
   puzzleId: string;
   satellites: Satellite[];
+  rejections?: RejectionEntry[];
   swapsLeft: number;
   misses: number;
   sealed: boolean;
